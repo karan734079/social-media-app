@@ -1,27 +1,54 @@
 import Lottie from 'lottie-react';
-import React from 'react'
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 import robo from '../images/animations/robo.json'
+import axios from 'axios';
 
 const Login = () => {
+  const [username , setUsername] = useState("");
+  const [password , setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/login", { username, password });
+      alert(response.data.message);
+  
+      // Save token and navigate
+      localStorage.setItem('token', response.data.token);
+      navigate('/browse'); 
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error logging in');
+    }
+  };
+
+
   return (
     <div className='items-center text-center justify-center'>
-      <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Socio</h1>
+      <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
       <div className="flex items-center justify-center bg-white text-black space-x-5">
         <div>
           <Lottie className='w-[500px] h-[550px]' animationData={robo} />
         </div>
         <div className="flex flex-col items-center bg-red-600 px-8 py-14 space-y-4 max-w-sm w-full rounded-lg opacity-95">
-          <form className="w-full space-y-4">
+          <form className="w-full space-y-4" onSubmit={handleLogin}>
             <input
               type="text"
               placeholder="username"
               className="w-full px-4 py-3 rounded bg-gray-100 focus:outline-none"
+              value = {username}
+              onChange={(e)=>setUsername(e.target.value)}
+              required
             />
             <input
               type="password"
               placeholder="Password"
               className="w-full px-4 py-3 rounded bg-gray-100  focus:outline-none"
+              value = {password}
+              onChange={(e)=>setPassword(e.target.value)}
+              required
             />
             <button
               type="submit"
