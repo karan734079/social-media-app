@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
+import CreateProfile from "./Components/CreateProfile";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -24,6 +25,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/sign-up",
     element: <SignUp />,
+  },
+  {
+    path : '/create-profile',
+    element : <CreateProfile />
   },
   {
     path: "/browse",

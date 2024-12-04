@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import robo from '../images/animations/robot.json'
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -15,8 +16,15 @@ const SignUp = () => {
   
     try {
       const response = await axios.post('http://localhost:5000/api/auth/sign-up', { email, username, password }); // Fix URL
-      alert(response.data.message);
-      navigate('/'); // Navigate to login after sign-up
+
+      Swal.fire({
+        title: "Account Created Successfully",
+        text: response.data.message,
+        icon: 'success',
+        confirmButtontext: 'ok',
+        confirmButtonColor : 'red'
+      }).then(() => navigate('/'));
+
     } catch (err) {
       alert(err.response?.data?.message || 'Error Signing Up');
     }

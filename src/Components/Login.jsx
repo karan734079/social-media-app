@@ -3,27 +3,38 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import robo from '../images/animations/robo.json'
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const Login = () => {
-  const [username , setUsername] = useState("");
-  const [password , setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
   
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", { username, password });
-      alert(response.data.message);
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { username, password },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      
   
-      // Save token and navigate
-      localStorage.setItem('token', response.data.token);
-      navigate('/browse'); 
+      localStorage.setItem("token", response.data.token);
+  
+      Swal.fire({
+        title: "Login Successful",
+        icon: "success",
+        confirmButtonText: "OK",
+      }).then(() => {
+        const redirectPath = response.data.isProfileComplete ? "/browse" : "/create-profile";
+        navigate(redirectPath);
+      });
     } catch (err) {
-      alert(err.response?.data?.message || 'Error logging in');
+      Swal.fire("Error", err.response?.data?.message || "Error logging in", "error");
     }
   };
-
 
   return (
     <div className='items-center text-center justify-center'>
@@ -38,16 +49,16 @@ const Login = () => {
               type="text"
               placeholder="username"
               className="w-full px-4 py-3 rounded bg-gray-100 focus:outline-none"
-              value = {username}
-              onChange={(e)=>setUsername(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Password"
               className="w-full px-4 py-3 rounded bg-gray-100  focus:outline-none"
-              value = {password}
-              onChange={(e)=>setPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
             <button
