@@ -52,7 +52,7 @@ const Navbar = () => {
     return (
         <nav className="bg-white  p-4 justify-between min-w-[15%] shadow-lg h-screen space-y-8 cursor-pointer fixed">
             <div className="font-bold text-start p-3 text-3xl text-red-600 hover:text-red-700">Linknest</div>
-            <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img
+            <span className='m-3 flex space-x-2 transition-transform transform hover:scale-105'><img
                 src={profilePhoto || profileIcon}
                 alt="Profile"
                 className="h-8 w-8 rounded-full mb-5"
