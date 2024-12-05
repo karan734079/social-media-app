@@ -10,6 +10,8 @@ import {
 import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
 import CreateProfile from "./Components/CreateProfile";
+import Profile from "./Components/ProfilePage";
+import Navbar from "./Components/Navbar";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -27,14 +29,29 @@ const appRouter = createBrowserRouter([
     element: <SignUp />,
   },
   {
-    path : '/create-profile',
-    element : <CreateProfile />
+    path: "/create-profile",
+    element: <CreateProfile />,
   },
   {
     path: "/browse",
     element: (
       <ProtectedRoute>
         <Body />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <div className="flex">
+          <div>
+            <Navbar />
+          </div>
+          <div className="ml-96">
+            <Profile />
+          </div>
+        </div>
       </ProtectedRoute>
     ),
   },
