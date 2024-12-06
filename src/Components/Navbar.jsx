@@ -89,18 +89,18 @@ const Navbar = () => {
         <nav className="bg-white  p-4 justify-between min-w-[15%] shadow-lg h-screen space-y-8 cursor-pointer fixed">
             <div className="font-bold text-start p-3 text-3xl text-red-600 hover:text-red-700"><Link to={'/browse'}>Linknest</Link></div>
             <Link to={'/profile'}>
-            <span className='m-3 flex space-x-2 transition-transform transform hover:scale-105'><img
+            <span className='m-5 flex space-x-2 transition-transform transform hover:scale-105'><img
                 src={profilePhoto || profileIcon}
                 alt="Profile"
                 className="h-8 w-8 rounded-full mb-5"
             /><p className='font-semibold text-2xl'>{profileName}</p></span></Link>
-            <div className="flex flex-col text-start p-3 space-y-9 text-lg font-extralight">
+            <div className="flex flex-col text-start p-3 space-y-4 text-lg font-extralight">
                 <Link to={'/browse'}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={homeIcon} alt="" className='h-7 w-7' /><p>Home</p></span></Link>
-                <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={searchIcon} alt="" className='h-7 w-7' /><p>Search</p></span>
-                <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={messegeIcon} alt="" className='h-7 w-7' /><p>Messages</p></span>
-                <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={reelsIcon} alt="" className='h-7 w-7' /><p>Reels</p></span>
-                <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={notificationIcon} alt="" className='h-7 w-7' /><p>Notifications</p></span>
-                <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105' onClick={() => setIsCreateModalOpen(true)}><img src={createIcon} alt="" className='h-7 w-7' /><p>Create</p></span>
+                <Link to={""}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={searchIcon} alt="" className='h-7 w-7' /><p>Search</p></span></Link>
+                <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={messegeIcon} alt="" className='h-7 w-7' /><p>Messages</p></span></Link>
+                <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={reelsIcon} alt="" className='h-7 w-7' /><p>Reels</p></span></Link>
+                <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={notificationIcon} alt="" className='h-7 w-7' /><p>Notifications</p></span></Link>
+                <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105' onClick={() => setIsCreateModalOpen(true)}><img src={createIcon} alt="" className='h-7 w-7' /><p>Create</p></span></Link>
                 <Modal isOpen={isCreateModalOpen} onRequestClose={() => setIsCreateModalOpen(false)}>
                     <h2>Create a Post</h2>
                     <input type="file" onChange={handleFileChange} />

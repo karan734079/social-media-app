@@ -48,7 +48,7 @@ const Profile = () => {
                 <button onClick={fetchFollowing}>Following: {profile.following?.length}</button>
 
                 {showFollowers && (
-                    <div className='absolute'>
+                    <div >
                         <h3>Followers</h3>
                         {followers.map((follower) => (
                             <p key={follower._id}>{follower.username}</p>
@@ -57,7 +57,7 @@ const Profile = () => {
                 )}
 
                 {showFollowing && (
-                    <div className='absolute'>
+                    <div>
                         <h3>Following</h3>
                         {following.map((follow) => (
                             <p key={follow._id}>{follow.username}</p>

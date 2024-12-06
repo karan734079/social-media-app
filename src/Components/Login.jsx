@@ -1,7 +1,7 @@
 import Lottie from 'lottie-react';
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import robo from '../images/animations/robo.json'
+import robo from '../images/animations/create.json'
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -39,7 +39,7 @@ const Login = () => {
       <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
       <div className="flex items-center justify-center bg-white text-black space-x-5">
         <div>
-          <Lottie className='w-[500px] h-[550px]' animationData={robo} />
+          <Lottie className='w-[500px] h-[550px] m-2' animationData={robo} />
         </div>
         <div className="flex flex-col items-center bg-red-600 px-8 py-14 space-y-4 max-w-sm w-full rounded-lg opacity-95">
           <form className="w-full space-y-4" onSubmit={handleLogin}>

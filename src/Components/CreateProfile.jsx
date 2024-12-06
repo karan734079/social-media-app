@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import Lottie from 'lottie-react';
-import create from '../images/animations/create.json'
+import create from '../images/animations/robo.json'
 
 const CreateProfile = () => {
     const [profilePhoto, setProfilePhoto] = useState(null);
