@@ -9,8 +9,21 @@ export const fetchSuggestedUsers = createAsyncThunk(
     const { data } = await axios.get("http://localhost:5000/api/auth/users", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(data)
     return data;
+  }
+);
+
+export const fetchUserPosts = createAsyncThunk(
+  "users/fetchUserPosts",
+  async (userId, { getState }) => {
+    const token = localStorage.getItem("token");
+    const { data } = await axios.get(
+      `http://localhost:5000/api/auth/getPosts?filter=userId&userId=${userId}`,
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+    );
+    return { userId, posts: data };
   }
 );
 
@@ -34,6 +47,7 @@ const userSlice = createSlice({
   name: "users",
   initialState: {
     suggestedUsers: [],
+    userPosts: {},
     loading: false,
     error: null,
   },
@@ -55,7 +69,22 @@ const userSlice = createSlice({
       .addCase(toggleFollowUser.fulfilled, (state, action) => {
         const { userId, isFollowing } = action.payload;
         const user = state.suggestedUsers.find((u) => u._id === userId);
-        if (user) user.isFollowing = isFollowing;
+        if (user) {
+          user.isFollowing = isFollowing; // Update the isFollowing state
+        }
+      })
+      .addCase(fetchUserPosts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserPosts.fulfilled, (state, action) => {
+        const { userId, posts } = action.payload;
+        state.loading = false;
+        state.userPosts[userId] = posts; // Store posts for the specific user
+      })
+      .addCase(fetchUserPosts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });

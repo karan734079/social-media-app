@@ -98,7 +98,7 @@ const Navbar = () => {
                 <Link to={'/browse'}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={homeIcon} alt="" className='h-7 w-7' /><p>Home</p></span></Link>
                 <Link to={""}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={searchIcon} alt="" className='h-7 w-7' /><p>Search</p></span></Link>
                 <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={messegeIcon} alt="" className='h-7 w-7' /><p>Messages</p></span></Link>
-                <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={reelsIcon} alt="" className='h-7 w-7' /><p>Reels</p></span></Link>
+                <Link to={'/reels'}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={reelsIcon} alt="" className='h-7 w-7' /><p>Reels</p></span></Link>
                 <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'><img src={notificationIcon} alt="" className='h-7 w-7' /><p>Notifications</p></span></Link>
                 <Link to={''}><span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105' onClick={() => setIsCreateModalOpen(true)}><img src={createIcon} alt="" className='h-7 w-7' /><p>Create</p></span></Link>
                 <Modal isOpen={isCreateModalOpen} onRequestClose={() => setIsCreateModalOpen(false)}>

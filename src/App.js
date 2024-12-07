@@ -12,6 +12,7 @@ import SignUp from "./Components/SignUp";
 import CreateProfile from "./Components/CreateProfile";
 import Profile from "./Components/ProfilePage";
 import Navbar from "./Components/Navbar";
+import Reels from "./Components/Reels";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -50,6 +51,21 @@ const appRouter = createBrowserRouter([
           </div>
           <div className="ml-96">
             <Profile />
+          </div>
+        </div>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/reels",
+    element: (
+      <ProtectedRoute>
+        <div className="flex">
+          <div>
+            <Navbar />
+          </div>
+          <div className="ml-96">
+            <Reels />
           </div>
         </div>
       </ProtectedRoute>

@@ -43,6 +43,7 @@ const Posts = () => {
     if (userId) fetchPosts();
   }, [userId]);
 
+  // Handle like functionality
   const handleLike = async (postId) => {
     try {
       const response = await axios.put(
@@ -61,6 +62,27 @@ const Posts = () => {
     }
   };
 
+  // Handle delete functionality
+  const handleDelete = async (postId) => {
+    try {
+      // Ensure the post belongs to the current user
+      const postToDelete = posts.find(post => post._id === postId);
+      if (postToDelete.user._id !== userId) {
+        alert("You can only delete your own posts.");
+        return;
+      }
+
+      // Send request to delete the post
+      await axios.delete(`http://localhost:5000/api/auth/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      // Remove the post from the state (optimistic UI update)
+      setPosts(posts.filter((post) => post._id !== postId));
+    } catch (err) {
+      console.error("Error deleting post:", err.message);
+    }
+  };
+
   return (
     <div className="grid grid-cols-3 gap-5">
       {posts.map((post) => (
@@ -68,13 +90,25 @@ const Posts = () => {
           className="bg-white shadow p-5 rounded-md mb-4 w-[250px] items-center justify-center text-center"
           key={post._id}
         >
-          <div className="font-semibold flex pb-3 border-b-2 cursor-pointer">
-            <img
-              src={post.user?.profilePhoto || profileIcon}
-              alt="Profile"
-              className="h-7 w-7 rounded-full mr-2"
-            />
-            {post.user?.username || "Unknown User"}
+          <div className="font-semibold flex justify-between pb-3 border-b-2 cursor-pointer">
+            <div className="flex">
+              <img
+                src={post.user?.profilePhoto || profileIcon}
+                alt="Profile"
+                className="h-7 w-7 rounded-full mr-2"
+              />
+              {post.user?.username || "Unknown User"}
+            </div>
+            <div>
+              {post.user._id === userId && (
+                <button
+                  onClick={() => handleDelete(post._id)}
+                  className=" text-red-500 hover:text-red-700"
+                >
+                  X
+                </button>
+              )}
+            </div>
           </div>
           <img
             src={post.mediaUrl}
