@@ -146,23 +146,23 @@ const Profile = () => {
             {/* Change Photo Modal */}
             {showChangePhoto && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-                    <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
+                    <div className="bg-red-600 p-8 rounded-lg shadow-lg w-1/3 outline-none">
                         <h2 className="text-2xl font-semibold mb-4">Upload New Profile Photo</h2>
                         <input
                             type="file"
                             onChange={handlePhotoChange}
-                            className="mb-4 border p-2 rounded-md w-full"
+                            className="mb-4 p-2 rounded-md w-full outl"
                         />
-                        <div className="flex justify-between">
+                        <div className="flex justify-between space-x-2">
                             <button
                                 onClick={handlePhotoUpload}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
+                                className="bg-black text-white py-2 px-4 rounded-md hover:bg-gray-950 transition-colors w-full"
                             >
                                 Upload
                             </button>
                             <button
                                 onClick={() => setShowChangePhoto(false)}
-                                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-300"
+                                className="bg-white text-black py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
                             >
                                 Cancel
                             </button>
