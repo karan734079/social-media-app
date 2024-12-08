@@ -55,14 +55,14 @@ const MainFeed = () => {
     } catch (err) {
       console.error("Error liking post:", err.message);
     }
-  };
+  };  
 
   return (
     <div className="px-5 flex space-x-10 mx-8 mt-10">
       <div>
         {posts.map((post) => (
           <div
-            className="bg-white w-full shadow p-5 rounded-md mb-4 mx-8 items-center justify-center text-center"
+            className="bg-white min-w-full max-w-full shadow p-5 rounded-md mb-4 mx-8 items-center justify-center text-center"
             key={post._id}
           >
             <div className="font-semibold flex pb-3 border-b-2 cursor-pointer">

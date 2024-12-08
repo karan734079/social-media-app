@@ -70,8 +70,8 @@ const SuggestedUsers = () => {
                     className="w-16 h-16 rounded-full"
                   />
                   <div>
-                    <h2 className="text-xl font-semibold">{user.name}</h2>
-                    <p className="text-white">@{user.username}</p>
+                    <h2 className="text-xl text-black font-semibold">{user.name}</h2>
+                    <p className="text-black">@{user.username}</p>
                   </div>
                 </div>
                 <div className="mt-4 text-white">
