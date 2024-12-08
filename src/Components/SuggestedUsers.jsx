@@ -47,7 +47,7 @@ const SuggestedUsers = () => {
                 <img
                   src={user.profilePhoto}
                   alt={`${user.username}'s profile`}
-                  className="w-8 h-8 rounded-full"
+                  className="w-8 h-8 rounded-full ring-2 ring-red-600"
                 />
                 <div className="text-lg">{user.username}</div>
               </div>
@@ -67,7 +67,7 @@ const SuggestedUsers = () => {
                   <img
                     src={user.profilePhoto}
                     alt={`${user.username}'s profile`}
-                    className="w-16 h-16 rounded-full"
+                    className="w-16 h-16 rounded-full ring-2 ring-black"
                   />
                   <div>
                     <h2 className="text-xl text-black font-semibold">{user.name}</h2>

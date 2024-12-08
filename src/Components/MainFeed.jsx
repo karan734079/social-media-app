@@ -55,44 +55,55 @@ const MainFeed = () => {
     } catch (err) {
       console.error("Error liking post:", err.message);
     }
-  };  
+  };
 
   return (
     <div className="px-5 flex space-x-10 mx-8 mt-10">
-      <div>
+      <div className="flex flex-wrap gap-6 w-full justify-center">
         {posts.map((post) => (
           <div
-            className="bg-white min-w-full max-w-full shadow p-5 rounded-md mb-4 mx-8 items-center justify-center text-center"
+            className="bg-white shadow-lg w-full sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[600px] min-h-[400px] rounded-md mb-6 p-5 flex flex-col items-center"
             key={post._id}
           >
-            <div className="font-semibold flex pb-3 border-b-2 cursor-pointer">
+            <div className="font-semibold flex pb-3 border-b-2 w-full">
               <img
                 src={post.user?.profilePhoto || profileIcon}
                 alt="Profile"
-                className="h-7 w-7 rounded-full mr-2"
+                className="h-10 w-10 rounded-full mr-3 ring-2 ring-red-600"
               />
-              {post.user?.username || "Unknown User"}
+              <span className="self-center text-xl">{post.user?.username || "Unknown User"}</span>
             </div>
-            <img
-              src={post.mediaUrl}
-              alt="Post"
-              className="w-full h-auto rounded-md mt-2"
-            />
-            <div className="mt-2 text-gray-600 border-t-2 pt-3 flex justify-between">
+
+            {/* Render video or image based on media type */}
+            {post.mediaType === "video" ? (
+              <video
+                controls
+                src={post.mediaUrl}
+                className="w-full h-[300px] object-contain rounded-md mt-3"
+              />
+            ) : (
+              <img
+                src={post.mediaUrl}
+                alt="Post"
+                className="w-full h-auto object-contain rounded-md mt-3"
+              />
+            )}
+
+            <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2">
               <button
-                className="flex items-center"
+                className="flex items-center text-sm"
                 onClick={() => handleLike(post._id)}
               >
-                <img src={likeIcon} alt="Like" className="h-6 w-6 mr-1" />
+                <img src={likeIcon} alt="Like" className="h-6 w-6 mr-2" />
                 <span>{post.likes} likes</span>
               </button>
-              <span>
-                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-              </span>
+              <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Suggested Users Sidebar */}
       <div className="px-4">
         <SuggestedUsers />
       </div>

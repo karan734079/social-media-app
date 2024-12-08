@@ -82,25 +82,23 @@ const Profile = () => {
     
 
     return (
-        <div className="bg-gray-50 min-h-screen flex flex-col items-center py-8">
+        <div className=" min-h-screen w-[1000px] flex flex-col items-center py-8">
             <div className="bg-white w-full max-w-4xl p-8 rounded-lg shadow-xl space-y-6">
                 <div className="flex justify-center items-center flex-col">
                     <img
                         src={profile.profilePhoto}
                         alt="Profile"
-                        className="rounded-full h-40 w-40 border-4 border-blue-500 mb-4"
-                    />
-                    <h2 className="text-3xl font-semibold text-gray-800">{profile.name}</h2>
-                    <p className="text-lg text-gray-500">@{profile.username}</p>
-                    <p className="text-lg text-gray-600">{profile.email}</p>
-                    <p className="text-lg text-gray-600">{profile.address}</p>
-
-                    <button
+                        className="rounded-full h-40 w-40 border-4 border-red-600 mb-2"
+                    /><button
                         onClick={handleChangePhotoClick}
-                        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
+                        className="mb-5 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
                     >
                         Change Profile Photo
                     </button>
+                    <h2 className="text-3xl font-semibold text-gray-800">{profile.name}</h2>
+                    <p className="text-lg text-gray-500">@{profile.username}</p>
+                    <p className="text-lg text-gray-600">{profile.email}</p>
+                    <p className="text-lg text-gray-600">{profile.address}</p>  
                 </div>
 
                 <div className="flex justify-around items-center">
@@ -174,7 +172,7 @@ const Profile = () => {
             )}
 
             <div className="mt-8 w-full max-w-4xl">
-                <h1 className='text-3xl font-semibold m-5'>Posts:</h1>
+                <h1 className='text-3xl font-semibold m-5 text-red-600'>Posts:</h1>
                 <Posts />
             </div>
         </div>

@@ -1,12 +1,12 @@
 import React from 'react';
-import homeIcon from '../images/846449.png';
-import searchIcon from '../images/search-icon-free-vector-removebg-preview.png';
-import messegeIcon from '../images/685887.png';
+import homeIcon from '../images/home-removebg-preview.png';
+import searchIcon from '../images/searchIcon-removebg-preview.png';
+import messegeIcon from '../images/message-removebg-preview.png';
 import profileIcon from '../images/Screenshot_2024-12-02_111230-removebg-preview.png';
-import createIcon from '../images/39c8f16f856d23e08b995f8facdbcf8d-removebg-preview.png';
-import notificationIcon from '../images/3119338.png';
-import logoutIcon from '../images/126467.png';
-import reelsIcon from '../images/reels.png';
+import createIcon from '../images/create-removebg-preview.png';
+import notificationIcon from '../images/notification-removebg-preview.png';
+import logoutIcon from '../images/logout-removebg-preview.png';
+import reelsIcon from '../images/reels-removebg-preview (1).png';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -44,29 +44,30 @@ const Navbar = () => {
 
     const handleUpload = async () => {
         if (!selectedFile) {
-            Swal.fire("Error", 'Please select a file to upload', 'error');
-            return;
+          Swal.fire("Error", "Please select a file to upload", "error");
+          return;
         }
-
+      
         const formData = new FormData();
-        formData.append('file', selectedFile);
-
+        formData.append("file", selectedFile);
+      
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/posts', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-
-            Swal.fire('Success', 'Post created successfully!', 'success', response.data.message);
-            setIsCreateModalOpen(false);
-            setSelectedFile(null);
+          const response = await axios.post("http://localhost:5000/api/auth/posts", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+      
+          Swal.fire("Success", "Post created successfully!", "success", response.data.message);
+          setIsCreateModalOpen(false);
+          setSelectedFile(null);
         } catch (err) {
-            console.error('Error uploading post:', err.message);
-            Swal.fire('Error', 'Error uploading post!', 'error');
+          console.error("Error uploading post:", err.message);
+          Swal.fire("Error", "Error uploading post!", "error");
         }
-    };
+      };
+      
 
     const handleLogOut = () => {
         Swal.fire({
@@ -89,16 +90,16 @@ const Navbar = () => {
                 <Link to={'/browse'}>Linknest</Link>
             </div>
             <Link to={'/profile'}>
-                <span className='m-5 flex space-x-2 transition-transform transform hover:scale-105'>
+                <span className='m-6 flex space-x-2 transition-transform transform hover:scale-105'>
                     <img
                         src={profilePhoto || profileIcon}
                         alt="Profile"
-                        className="h-8 w-8 rounded-full mb-5"
+                        className="h-9 w-9 rounded-full mb-5 ring-2 ring-red-600"
                     />
                     <p className='font-semibold text-2xl'>{profileName}</p>
                 </span>
             </Link>
-            <div className="flex flex-col text-start p-3 space-y-4 text-lg font-extralight">
+            <div className="flex flex-col text-start p-4 space-y-4 text-lg font-extralight">
                 <Link to={'/browse'}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
                         <img src={homeIcon} alt="" className='h-7 w-7' />
@@ -137,28 +138,28 @@ const Navbar = () => {
                 </Link>
 
                 {/* Modal for Creating Post */}
-                <Modal 
-                    isOpen={isCreateModalOpen} 
-                    onRequestClose={() => setIsCreateModalOpen(false)} 
+                <Modal
+                    isOpen={isCreateModalOpen}
+                    onRequestClose={() => setIsCreateModalOpen(false)}
                     className="flex justify-center items-center mx-[35rem] my-[15rem] max-w-lg w-full bg-red-600 rounded-lg shadow-lg p-6"
                     overlayClassName="fixed inset-0 bg-black bg-opacity-50"
                 >
                     <div className="w-full max-w-md mx-auto">
                         <h2 className="text-2xl text-center mb-4 font-bold">Create a Post</h2>
-                        <input 
-                            type="file" 
-                            onChange={handleFileChange} 
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
                             className="w-full p-2  rounded-lg mb-4 cursor-pointer"
                         />
                         <div className="flex justify-between space-x-4">
-                            <button 
-                                onClick={handleUpload} 
+                            <button
+                                onClick={handleUpload}
                                 className="bg-black text-white py-2 px-4 rounded-md hover:bg-gray-950 transition-colors w-full"
                             >
                                 Upload
                             </button>
-                            <button 
-                                onClick={() => setIsCreateModalOpen(false)} 
+                            <button
+                                onClick={() => setIsCreateModalOpen(false)}
                                 className="bg-white text-black py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
                             >
                                 Cancel
@@ -167,8 +168,8 @@ const Navbar = () => {
                     </div>
                 </Modal>
             </div>
-            <div className='flex space-x-2 p-3 text-center font-semibold space-y-6 transition-transform transform hover:scale-105' onClick={handleLogOut}>
-                <img src={logoutIcon} alt="" className='h-8 w-8 mt-6' />
+            <div className='flex space-x-2 p-3 text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
+                <img src={logoutIcon} alt="" className='h-8 w-8' />
                 <p className='text-xl'>Logout</p>
             </div>
         </nav>

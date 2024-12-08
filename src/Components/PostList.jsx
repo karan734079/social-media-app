@@ -42,17 +42,25 @@ const PostsList = ({ posts: initialPosts }) => {
             <img
               src={post.user?.profilePhoto || "/default-avatar.png"}
               alt="Profile"
-              className="h-7 w-7 rounded-full mr-2"
+              className="h-7 w-7 rounded-full mr-2 ring-2 ring-red-600"
             />
             <span className="text-black">{post.user?.username || "Unknown User"}</span>
           </div>
 
           {/* Post Media */}
-          <img
-            src={post.mediaUrl}
-            alt="Post"
-            className="w-full h-auto rounded-md mt-2"
-          />
+          {post.mediaType === "video" ? (
+            <video
+              controls
+              src={post.mediaUrl}
+              className="w-full h-[300px] object-contain rounded-md mt-2"
+            />
+          ) : (
+            <img
+              src={post.mediaUrl}
+              alt="Post"
+              className="w-full h-auto rounded-md mt-2"
+            />
+          )}
 
           {/* Post Footer */}
           <div className="mt-2 text-gray-600 border-t-2 pt-3 flex justify-between items-center">

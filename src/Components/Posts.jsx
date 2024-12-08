@@ -84,46 +84,56 @@ const Posts = () => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-5 mt-10">
       {posts.map((post) => (
         <div
-          className="bg-white shadow p-5 rounded-md mb-4 w-[250px] items-center justify-center text-center"
+          className="bg-white shadow-md rounded-md p-4 flex flex-col justify-between items-center"
           key={post._id}
         >
-          <div className="font-semibold flex justify-between pb-3 border-b-2 cursor-pointer">
-            <div className="flex">
+          <div className="font-semibold flex justify-between w-full pb-3 border-b-2">
+            <div className="flex items-center space-x-2">
               <img
                 src={post.user?.profilePhoto || profileIcon}
                 alt="Profile"
-                className="h-7 w-7 rounded-full mr-2"
+                className="h-7 w-7 rounded-full ring-2 ring-red-600"
               />
-              {post.user?.username || "Unknown User"}
+              <span className="text-md">{post.user?.username || "Unknown User"}</span>
             </div>
-            <div>
-              {post.user._id === userId && (
-                <button
-                  onClick={() => handleDelete(post._id)}
-                  className=" text-red-500 hover:text-red-700"
-                >
-                  X
-                </button>
-              )}
-            </div>
+            {/* Display delete button only for the current user's posts */}
+            {post.user._id === userId && (
+              <button
+                onClick={() => handleDelete(post._id)}
+                className="text-red-500 hover:text-red-700 text-xl"
+              >
+                X
+              </button>
+            )}
           </div>
-          <img
-            src={post.mediaUrl}
-            alt="Post"
-            className="w-full h-auto rounded-md mt-2"
-          />
-          <div className="mt-2 text-gray-600 border-t-2 pt-3 flex justify-between ">
+
+          {/* Render video or image based on media type */}
+          {post.mediaType === "video" ? (
+            <video
+              controls
+              src={post.mediaUrl}
+              className="w-full max-h-[400px] object-contain rounded-md mt-3"
+            />
+          ) : (
+            <img
+              src={post.mediaUrl}
+              alt="Post"
+              className="w-full max-h-[400px] object-contain rounded-md mt-3"
+            />
+          )}
+
+          <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2">
             <button
               className="flex items-center"
               onClick={() => handleLike(post._id)}
             >
-              <img src={likeIcon} alt="Like" className="h-6 w-6 mr-1" />
+              <img src={likeIcon} alt="Like" className="h-6 w-6 mr-2" />
               <span>{post.likes} likes</span>
             </button>
-            <span className="text-sm mt-1">
+            <span className="text-xs text-gray-500">
               {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
             </span>
           </div>
