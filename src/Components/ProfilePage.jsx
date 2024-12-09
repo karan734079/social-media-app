@@ -88,7 +88,7 @@ const Profile = () => {
                     <img
                         src={profile.profilePhoto}
                         alt="Profile"
-                        className="rounded-full h-40 w-40 border-4 border-red-600 mb-2"
+                        className="rounded-full h-40 w-40 border-4 border-gray-300 mb-2"
                     /><button
                         onClick={handleChangePhotoClick}
                         className="mb-5 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"

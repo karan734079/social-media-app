@@ -71,7 +71,7 @@ const Reels = () => {
                 <img
                   src={post.user?.profilePhoto || profileIcon}
                   alt="Profile"
-                  className="h-10 w-10 rounded-full mr-3 ring-2 ring-red-600"
+                  className="h-10 w-10 rounded-full mr-3 ring-2 ring-gray-300"
                 />
                 <span className="self-center text-xl">{post.user?.username || "Unknown User"}</span>
               </div>

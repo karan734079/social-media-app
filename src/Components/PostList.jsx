@@ -42,7 +42,7 @@ const PostsList = ({ posts: initialPosts }) => {
             <img
               src={post.user?.profilePhoto || "/default-avatar.png"}
               alt="Profile"
-              className="h-7 w-7 rounded-full mr-2 ring-2 ring-red-600"
+              className="h-7 w-7 rounded-full mr-2 ring-2 ring-gray-300"
             />
             <span className="text-black">{post.user?.username || "Unknown User"}</span>
           </div>
