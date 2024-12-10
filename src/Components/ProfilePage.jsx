@@ -8,8 +8,8 @@ const Profile = () => {
     const [following, setFollowing] = useState([]);
     const [showFollowers, setShowFollowers] = useState(false);
     const [showFollowing, setShowFollowing] = useState(false);
-    const [showChangePhoto, setShowChangePhoto] = useState(false); // For showing the photo change modal
-    const [newPhoto, setNewPhoto] = useState(null); // Store the selected photo
+    const [showChangePhoto, setShowChangePhoto] = useState(false);
+    const [newPhoto, setNewPhoto] = useState(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -24,46 +24,42 @@ const Profile = () => {
 
     const fetchFollowers = async () => {
         if (showFollowers) {
-            setShowFollowers(false); // Close the followers card if it's already open
+            setShowFollowers(false);
         } else {
             const response = await axios.get('http://localhost:5000/api/auth/followers', {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setFollowers(response.data);
-            setShowFollowers(true); // Show the followers card
+            setShowFollowers(true);
         }
     };
 
     const fetchFollowing = async () => {
         if (showFollowing) {
-            setShowFollowing(false); // Close the following card if it's already open
+            setShowFollowing(false);
         } else {
             const response = await axios.get('http://localhost:5000/api/auth/following', {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setFollowing(response.data);
-            setShowFollowing(true); // Show the following card
+            setShowFollowing(true);
         }
     };
 
-    // Handle photo change modal toggle
     const handleChangePhotoClick = () => {
         setShowChangePhoto(true);
     };
 
-    // Handle file input change
     const handlePhotoChange = (event) => {
-        setNewPhoto(event.target.files[0]); // Store selected photo
+        setNewPhoto(event.target.files[0]);
     };
 
-    // Handle photo upload
     const handlePhotoUpload = async () => {
         const formData = new FormData();
 
-        // Ensure that both the photo and the profile fields (if any) are included
-        formData.append('profilePhoto', newPhoto); // Photo
-        formData.append('name', profile.name); // Name
-        formData.append('address', profile.address); // Address
+        formData.append('profilePhoto', newPhoto);
+        formData.append('name', profile.name);
+        formData.append('address', profile.address);
 
         try {
             const response = await axios.put('http://localhost:5000/api/auth/profile', formData, {
@@ -73,8 +69,8 @@ const Profile = () => {
                 },
             });
 
-            setProfile({ ...profile, profilePhoto: response.data.user.profilePhoto }); // Update profile with new photo
-            setShowChangePhoto(false); // Close the modal
+            setProfile({ ...profile, profilePhoto: response.data.user.profilePhoto });
+            setShowChangePhoto(false);
         } catch (error) {
             console.error('Error uploading photo:', error.response || error);
         }
@@ -101,7 +97,7 @@ const Profile = () => {
                     <p className="text-lg text-gray-600">{profile.address}</p>
                 </div>
 
-                <div className="flex justify-around items-center">
+                <div className="flex space-x-32 ml-60 items-center">
                     <button
                         onClick={fetchFollowers}
                         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
@@ -147,7 +143,6 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* Change Photo Modal */}
             {showChangePhoto && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
                     <div className="bg-red-600 p-8 rounded-lg shadow-lg w-1/3 outline-none">

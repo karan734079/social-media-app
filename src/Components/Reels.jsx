@@ -51,7 +51,7 @@ const Reels = () => {
       );
       const updatedPost = posts.map((post) =>
         post._id === postId
-          ? { ...post, likes: response.data.likes, isLiked: !isLiked } // Toggle like status
+          ? { ...post, likes: response.data.likes, isLiked: !isLiked }
           : post
       );
       setPosts(updatedPost);
@@ -81,7 +81,6 @@ const Reels = () => {
                 <span className="self-center text-xl">{post.user?.username || "Unknown User"}</span>
               </div>
 
-              {/* Render video based on media type */}
               {post.mediaType === "video" && (
                 <video
                   controls
@@ -104,7 +103,6 @@ const Reels = () => {
           ))}
         </div>
 
-        {/* Suggested Users Sidebar */}
         <div className="px-4">
           <SuggestedUsers />
         </div>

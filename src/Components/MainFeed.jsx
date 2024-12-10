@@ -49,7 +49,7 @@ const MainFeed = () => {
       );
       const updatedPost = posts.map((post) =>
         post._id === postId
-          ? { ...post, likes: response.data.likes, isLiked: !isLiked } // Toggle like status
+          ? { ...post, likes: response.data.likes, isLiked: !isLiked }
           : post
       );
       setPosts(updatedPost);
@@ -76,7 +76,6 @@ const MainFeed = () => {
               <span className="self-center text-xl">{post.user?.username || "Unknown User"}</span>
             </div>
 
-            {/* Render video or image based on media type */}
             {post.mediaType === "video" ? (
               <video
                 controls
@@ -105,8 +104,7 @@ const MainFeed = () => {
         ))}
       </div>
 
-      {/* Suggested Users Sidebar */}
-      <div className="px-4">
+      <div className="px-2">
         <SuggestedUsers />
       </div>
     </div>

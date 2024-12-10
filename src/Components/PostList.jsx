@@ -24,7 +24,7 @@ const PostsList = ({
       );
       const updatedPost = posts.map((post) =>
         post._id === postId
-          ? { ...post, likes: response.data.likes, isLiked: !isLiked } // Toggle like status
+          ? { ...post, likes: response.data.likes, isLiked: !isLiked }
           : post
       );
       setPosts(updatedPost);
@@ -40,7 +40,6 @@ const PostsList = ({
           className="bg-white shadow-md p-4 rounded-lg flex flex-col justify-between h-[450px] mb-4 text-center"
           key={post._id}
         >
-          {/* Post Header */}
           <div className="font-semibold flex items-center justify-start pb-3 border-b-2 cursor-pointer">
             <img
               src={post.user?.profilePhoto || "/default-avatar.png"}
@@ -50,7 +49,6 @@ const PostsList = ({
             <span className="text-black">{post.user?.username || "Unknown User"}</span>
           </div>
 
-          {/* Post Media */}
           <div className="flex-grow mt-4">
             {post.mediaType === "video" ? (
               <video
@@ -67,7 +65,6 @@ const PostsList = ({
             )}
           </div>
 
-          {/* Post Footer */}
           <div className="mt-4 w-full text-gray-600 flex justify-between items-center text-sm border-t-2 pt-2">
             <button
               className={`flex items-center text-sm ${

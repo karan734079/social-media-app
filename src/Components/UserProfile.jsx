@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // to extract userId from URL
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import PostsList from '../Components/PostList'; // Assuming you have a PostsList component
+import PostsList from '../Components/PostList';
 
 const UserProfile = () => {
-    const { userId } = useParams(); // Get userId from URL params
+    const { userId } = useParams();
     const [user, setUser] = useState(null);
     const [userPosts, setUserPosts] = useState([]);
     const [followers, setFollowers] = useState([]);
@@ -19,19 +19,16 @@ const UserProfile = () => {
             try {
                 setLoading(true);
 
-                // Fetch user profile details based on the userId from URL
                 const userResponse = await axios.get(`http://localhost:5000/api/auth/profile?userId=${userId}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 setUser(userResponse.data);
 
-                // Fetch user posts based on the userId from URL
                 const postsResponse = await axios.get(`http://localhost:5000/api/auth/getPosts?filter=userId&userId=${userId}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 setUserPosts(postsResponse.data);
 
-                // Fetch followers and following data
                 const followersResponse = await axios.get(`http://localhost:5000/api/auth/followers?userId=${userId}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
@@ -82,25 +79,29 @@ const UserProfile = () => {
                     <p className="text-lg text-gray-600">{user.address}</p>
                 </div>
 
-                <div className="flex justify-around items-center">
-                    <button
-                        onClick={fetchFollowers}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
-                    >
-                        Followers: {followers.length}
-                    </button>
-                    <button
-                        onClick={fetchFollowing}
-                        className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300"
-                    >
-                        Following: {following.length}
-                    </button>
-                    <button
-                        onClick={handleMessage}
-                        className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
-                    >
-                        Message
-                    </button>
+                <div className="flex items-center ml-60 space-x-3">
+                    <div className='space-x-3'>
+                        <button
+                            onClick={fetchFollowers}
+                            className="bg-blue-600 text-white  px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
+                        >
+                            Followers: {followers.length}
+                        </button>
+                        <button
+                            onClick={fetchFollowing}
+                            className="bg-green-600 text-white  px-4 py-2 rounded-md hover:bg-green-700 transition duration-300"
+                        >
+                            Following: {following.length}
+                        </button>
+                    </div>
+                    <div>
+                        <button
+                            onClick={handleMessage}
+                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
+                        >
+                            Message
+                        </button>
+                    </div>
                 </div>
 
                 {showFollowers && (
@@ -131,7 +132,7 @@ const UserProfile = () => {
 
                 <div className="mt-8 w-full max-w-4xl">
                     <h1 className="text-3xl font-semibold m-5 text-red-600">Posts:</h1>
-                    <PostsList posts={userPosts} className="grid grid-cols-3 gap-4 object-contain" />
+                    <PostsList posts={userPosts} className="grid grid-cols-3 gap-4" />
                 </div>
             </div>
         </div>

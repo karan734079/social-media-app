@@ -124,7 +124,6 @@ const Navbar = () => {
                     </span>
                 </Link>
 
-                {/* Modal for Creating Post */}
                 <Modal
                     isOpen={isCreateModalOpen}
                     onRequestClose={() => setIsCreateModalOpen(false)}

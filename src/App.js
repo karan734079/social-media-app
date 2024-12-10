@@ -3,8 +3,6 @@ import { Provider } from "react-redux";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import "./App.css";
 import store from "./utils/store";
-
-// Components
 import Body from "./Components/Body";
 import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
@@ -15,13 +13,11 @@ import Reels from "./Components/Reels";
 import Searchbar from "./Components/Searchbar";
 import UserProfile from "./Components/UserProfile";
 
-// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 
-// Helper Layout Component for Protected Routes
 const ProtectedLayout = ({ children }) => (
   <div className="flex">
     <Navbar />
@@ -29,7 +25,6 @@ const ProtectedLayout = ({ children }) => (
   </div>
 );
 
-// Router Config
 const appRouter = createBrowserRouter([
   { path: "/", element: <Login /> },
   { path: "/sign-up", element: <SignUp /> },
@@ -84,7 +79,6 @@ const appRouter = createBrowserRouter([
   },
 ]);
 
-// Main App Component
 function App() {
   return (
     <Provider store={store}>

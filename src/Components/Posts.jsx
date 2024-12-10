@@ -7,7 +7,6 @@ const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [userId, setUserId] = useState(null);
 
-  // Fetch the logged-in user's profile to get their ID
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -23,7 +22,6 @@ const Posts = () => {
     fetchProfile();
   }, []);
 
-  // Fetch posts created by the current user
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -42,7 +40,6 @@ const Posts = () => {
     if (userId) fetchPosts();
   }, [userId]);
 
-  // Handle like functionality
   const handleLike = async (postId, isLiked) => {
     try {
       const response = await axios.put(
@@ -54,7 +51,7 @@ const Posts = () => {
       );
       const updatedPost = posts.map((post) =>
         post._id === postId
-          ? { ...post, likes: response.data.likes, isLiked: !isLiked } // Toggle like status
+          ? { ...post, likes: response.data.likes, isLiked: !isLiked }
           : post
       );
       setPosts(updatedPost);
@@ -63,21 +60,18 @@ const Posts = () => {
     }
   };
 
-  // Handle delete functionality
   const handleDelete = async (postId) => {
     try {
-      // Ensure the post belongs to the current user
       const postToDelete = posts.find(post => post._id === postId);
       if (postToDelete.user._id !== userId) {
         alert("You can only delete your own posts.");
         return;
       }
 
-      // Send request to delete the post
       await axios.delete(`http://localhost:5000/api/auth/posts/${postId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      // Remove the post from the state (optimistic UI update)
+
       setPosts(posts.filter((post) => post._id !== postId));
     } catch (err) {
       console.error("Error deleting post:", err.message);
@@ -100,7 +94,7 @@ const Posts = () => {
               />
               <span className="text-md">{post.user?.username || "Unknown User"}</span>
             </div>
-            {/* Display delete button only for the current user's posts */}
+
             {post.user._id === userId && (
               <button
                 onClick={() => handleDelete(post._id)}
@@ -111,7 +105,6 @@ const Posts = () => {
             )}
           </div>
 
-          {/* Render video or image based on media type */}
           {post.mediaType === "video" ? (
             <video
               controls

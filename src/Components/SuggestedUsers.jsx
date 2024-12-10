@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchSuggestedUsers, toggleFollowUser, fetchUserPosts } from '../utils/userSlice'; // Add fetchUserPosts
-import PostsList from '../Components/PostList'; // Assuming you have a PostsList component
+import { fetchSuggestedUsers, toggleFollowUser, fetchUserPosts } from '../utils/userSlice';
+import PostsList from '../Components/PostList';
 
 const SuggestedUsers = () => {
-  const [activeUserId, setActiveUserId] = useState(null); // Tracks the active user's card
-  const [postsVisible, setPostsVisible] = useState({}); // State to track posts visibility for each user
+  const [activeUserId, setActiveUserId] = useState(null);
+  const [postsVisible, setPostsVisible] = useState({});
   const dispatch = useDispatch();
-  const { suggestedUsers, loading, error, userPosts } = useSelector((state) => state.users); // Include userPosts
+  const { suggestedUsers, loading, error, userPosts } = useSelector((state) => state.users);
 
   useEffect(() => {
     dispatch(fetchSuggestedUsers());
@@ -18,15 +18,13 @@ const SuggestedUsers = () => {
   };
 
   const handleViewPosts = (userId) => {
-    // Fetch posts for the selected user and toggle their card
     if (!userPosts[userId]) {
       dispatch(fetchUserPosts(userId));
     }
 
-    // Toggle visibility of posts for the specific user
     setPostsVisible((prev) => ({
       ...prev,
-      [userId]: !prev[userId], // Toggle the visibility for this user
+      [userId]: !prev[userId],
     }));
   };
 
@@ -88,7 +86,6 @@ const SuggestedUsers = () => {
                   {postsVisible[user._id] ? 'Hide Posts' : `See ${user.name}'s Posts`}
                 </button>
 
-                {/* Conditionally render posts */}
                 {postsVisible[user._id] && userPosts[user._id] && (
                   <div className="mt-4">
                     <PostsList posts={userPosts[user._id]} />
