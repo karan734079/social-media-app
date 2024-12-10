@@ -85,7 +85,7 @@ const Posts = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-5 mt-10">
+    <div className="grid  sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 px-5 mt-10">
       {posts.map((post) => (
         <div
           className="bg-white shadow-md rounded-md p-4 flex flex-col justify-between items-center"

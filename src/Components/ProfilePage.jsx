@@ -59,12 +59,12 @@ const Profile = () => {
     // Handle photo upload
     const handlePhotoUpload = async () => {
         const formData = new FormData();
-        
+
         // Ensure that both the photo and the profile fields (if any) are included
         formData.append('profilePhoto', newPhoto); // Photo
         formData.append('name', profile.name); // Name
         formData.append('address', profile.address); // Address
-    
+
         try {
             const response = await axios.put('http://localhost:5000/api/auth/profile', formData, {
                 headers: {
@@ -72,14 +72,14 @@ const Profile = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-    
+
             setProfile({ ...profile, profilePhoto: response.data.user.profilePhoto }); // Update profile with new photo
             setShowChangePhoto(false); // Close the modal
         } catch (error) {
             console.error('Error uploading photo:', error.response || error);
         }
     };
-    
+
 
     return (
         <div className=" min-h-screen w-[1000px] flex flex-col items-center py-8">
@@ -98,7 +98,7 @@ const Profile = () => {
                     <h2 className="text-3xl font-semibold text-gray-800">{profile.name}</h2>
                     <p className="text-lg text-gray-500">@{profile.username}</p>
                     <p className="text-lg text-gray-600">{profile.email}</p>
-                    <p className="text-lg text-gray-600">{profile.address}</p>  
+                    <p className="text-lg text-gray-600">{profile.address}</p>
                 </div>
 
                 <div className="flex justify-around items-center">
@@ -141,6 +141,10 @@ const Profile = () => {
                         </ul>
                     </div>
                 )}
+                <div className="mt-8 w-full max-w-4xl">
+                    <h1 className='text-3xl font-semibold m-5 text-red-600'>Posts:</h1>
+                    <Posts />
+                </div>
             </div>
 
             {/* Change Photo Modal */}
@@ -171,10 +175,6 @@ const Profile = () => {
                 </div>
             )}
 
-            <div className="mt-8 w-full max-w-4xl">
-                <h1 className='text-3xl font-semibold m-5 text-red-600'>Posts:</h1>
-                <Posts />
-            </div>
         </div>
     );
 };

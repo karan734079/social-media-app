@@ -1,38 +1,39 @@
+import React from "react";
 import { Provider } from "react-redux";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import "./App.css";
 import store from "./utils/store";
+
+// Components
 import Body from "./Components/Body";
-import {
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from "react-router-dom";
 import Login from "./Components/Login";
 import SignUp from "./Components/SignUp";
 import CreateProfile from "./Components/CreateProfile";
 import Profile from "./Components/ProfilePage";
 import Navbar from "./Components/Navbar";
 import Reels from "./Components/Reels";
+import Searchbar from "./Components/Searchbar";
+import UserProfile from "./Components/UserProfile";
 
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
-
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 
+// Helper Layout Component for Protected Routes
+const ProtectedLayout = ({ children }) => (
+  <div className="flex">
+    <Navbar />
+    <div className="ml-96">{children}</div>
+  </div>
+);
+
+// Router Config
 const appRouter = createBrowserRouter([
-  {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "/sign-up",
-    element: <SignUp />,
-  },
-  {
-    path: "/create-profile",
-    element: <CreateProfile />,
-  },
+  { path: "/", element: <Login /> },
+  { path: "/sign-up", element: <SignUp /> },
+  { path: "/create-profile", element: <CreateProfile /> },
   {
     path: "/browse",
     element: (
@@ -45,14 +46,9 @@ const appRouter = createBrowserRouter([
     path: "/profile",
     element: (
       <ProtectedRoute>
-        <div className="flex">
-          <div>
-            <Navbar />
-          </div>
-          <div className="ml-96">
-            <Profile />
-          </div>
-        </div>
+        <ProtectedLayout>
+          <Profile />
+        </ProtectedLayout>
       </ProtectedRoute>
     ),
   },
@@ -60,19 +56,35 @@ const appRouter = createBrowserRouter([
     path: "/reels",
     element: (
       <ProtectedRoute>
-        <div className="flex">
-          <div>
-            <Navbar />
-          </div>
-          <div className="ml-96">
-            <Reels />
-          </div>
-        </div>
+        <ProtectedLayout>
+          <Reels />
+        </ProtectedLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/search",
+    element: (
+      <ProtectedRoute>
+        <ProtectedLayout>
+          <Searchbar />
+        </ProtectedLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/:userId",
+    element: (
+      <ProtectedRoute>
+        <ProtectedLayout>
+          <UserProfile />
+        </ProtectedLayout>
       </ProtectedRoute>
     ),
   },
 ]);
 
+// Main App Component
 function App() {
   return (
     <Provider store={store}>

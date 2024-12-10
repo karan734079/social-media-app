@@ -92,40 +92,34 @@ const Navbar = () => {
                     <p className='font-semibold text-2xl'>{profileName}</p>
                 </span>
             </Link>
-            <div className="flex flex-col text-start p-4 space-y-4 text-lg font-extralight">
+            <div className="flex flex-col text-start p-6 space-y-6 text-lg font-extralight">
                 <Link to={'/browse'}>
                     <span className='shadow-sm m-3 space-x-2 flex transition-transform transform hover:scale-105'>
-                        <i class="fa-solid fa-house text-red-600 mt-1"></i>
+                        <i className="fa-solid fa-house text-red-600 mt-1"></i>
                         <p>Home</p>
-                    </span>
-                </Link>
-                <Link to={""}>
-                    <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i class="fa-solid fa-magnifying-glass text-red-600 mt-1"></i>
-                        <p>Search</p>
                     </span>
                 </Link>
                 <Link to={''}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i class="fa-regular fa-message text-red-600 mt-2 "></i>
+                    <i className="fa-regular fa-message text-red-600 mt-2 "></i>
                         <p>Messages</p>
                     </span>
                 </Link>
                 <Link to={'/reels'}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i class="fa-solid fa-film text-red-600 mt-[0.40rem]"></i>
+                    <i className="fa-solid fa-film text-red-600 mt-[0.40rem]"></i>
                         <p>Reels</p>
                     </span>
                 </Link>
                 <Link to={''}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i class="fa-solid fa-bell text-red-600 mt-[0.40rem]"></i>
+                    <i className="fa-solid fa-bell text-red-600 mt-[0.40rem]"></i>
                         <p>Notifications</p>
                     </span>
                 </Link>
                 <Link to={''}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105' onClick={() => setIsCreateModalOpen(true)}>
-                    <i class="fa-solid fa-plus text-red-600 mt-[0.42rem]"></i>
+                    <i className="fa-solid fa-plus text-red-600 mt-[0.42rem]"></i>
                         <p>Create</p>
                     </span>
                 </Link>
@@ -161,9 +155,9 @@ const Navbar = () => {
                     </div>
                 </Modal>
             </div>
-            <div className='flex space-x-1 p-5 text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
-            <i class="fa-solid fa-arrow-right-from-bracket text-red-600 mt-2"></i>
-                <p className='text-xl'>Logout</p>
+            <div className='flex space-x-1 p-8  text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
+            <i className="fa-solid fa-arrow-right-from-bracket text-red-600 mt-[0.7rem]"></i>
+                <p className='text-2xl'>Logout</p>
             </div>
         </nav>
     );
