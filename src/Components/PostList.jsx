@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import likeIcon from "../images/4926585.png";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 
 const PostsList = ({ posts: initialPosts }) => {
-  const [posts, setPosts] = useState(initialPosts); // Local state to handle updates
+  const [posts, setPosts] = useState(initialPosts);
 
   if (!posts || posts.length === 0) {
     return <div className="text-gray-500 text-sm">No posts available.</div>;
@@ -69,8 +68,8 @@ const PostsList = ({ posts: initialPosts }) => {
               className="flex items-center"
               onClick={() => handleLike(post._id)}
             >
-              <img src={likeIcon} alt="Like" className="h-6 w-6 mr-1" />
-              <span>{post.likes} likes</span>
+              <i class="fa-solid fa-thumbs-up text-gray-400 mx-1 mt-2"></i>
+              <span className="mt-2">{post.likes} likes</span>
             </button>
 
             {/* Post Timestamp */}

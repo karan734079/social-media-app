@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SuggestedUsers from "./SuggestedUsers";
 import profileIcon from "../images/Screenshot_2024-12-02_111230-removebg-preview.png";
-import likeIcon from "../images/4926585.png";
 import { formatDistanceToNow } from "date-fns";
 
 const MainFeed = () => {
@@ -39,7 +38,7 @@ const MainFeed = () => {
     if (currentUserId) fetchPosts();
   }, [currentUserId]);
 
-  const handleLike = async (postId) => {
+  const handleLike = async (postId, isLiked) => {
     try {
       const response = await axios.put(
         `http://localhost:5000/api/auth/posts/${postId}/like`,
@@ -49,13 +48,16 @@ const MainFeed = () => {
         }
       );
       const updatedPost = posts.map((post) =>
-        post._id === postId ? { ...post, likes: response.data.likes } : post
+        post._id === postId
+          ? { ...post, likes: response.data.likes, isLiked: !isLiked } // Toggle like status
+          : post
       );
       setPosts(updatedPost);
     } catch (err) {
       console.error("Error liking post:", err.message);
     }
   };
+  
 
   return (
     <div className="px-5 flex space-x-10 mx-8 mt-10">
@@ -91,11 +93,11 @@ const MainFeed = () => {
 
             <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2">
               <button
-                className="flex items-center text-sm"
-                onClick={() => handleLike(post._id)}
+                className={`flex items-center text-sm ${post.isLiked ? 'text-blue-500' : 'text-gray-400'}`}
+                onClick={() => handleLike(post._id, post.isLiked)}
               >
-                <img src={likeIcon} alt="Like" className="h-6 w-6 mr-2" />
-                <span>{post.likes} likes</span>
+                <i className="fa-solid fa-thumbs-up mx-1 mt-2"></i>
+                <span className="mt-2">{post.likes} likes</span>
               </button>
               <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
             </div>
