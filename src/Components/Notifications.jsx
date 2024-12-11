@@ -84,7 +84,7 @@ const Notifications = () => {
                                 )}
                                     <button
                                         onClick={() => deleteNotification(notification._id)}
-                                        className="text-red-600 text-sm hover:text-red-700"
+                                        className="text-red-600 text-sm hover:text-red-700 transition-transform transform hover:scale-105"
                                     >
                                        Delete
                                     </button>
