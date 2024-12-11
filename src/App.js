@@ -12,6 +12,7 @@ import Navbar from "./Components/Navbar";
 import Reels from "./Components/Reels";
 import Searchbar from "./Components/Searchbar";
 import UserProfile from "./Components/UserProfile";
+import Notifications from "./Components/Notifications";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -73,6 +74,16 @@ const appRouter = createBrowserRouter([
       <ProtectedRoute>
         <ProtectedLayout>
           <UserProfile />
+        </ProtectedLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/notifications",
+    element: (
+      <ProtectedRoute>
+        <ProtectedLayout>
+          <Notifications/>
         </ProtectedLayout>
       </ProtectedRoute>
     ),

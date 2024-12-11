@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import profileIcon from '../images/Screenshot_2024-12-02_111230-removebg-preview.png';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Modal from 'react-modal';
@@ -13,6 +12,7 @@ const Navbar = () => {
     const [profileName, setProfileName] = useState("Guest");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [unreadCount, setUnreadCount] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -37,30 +37,45 @@ const Navbar = () => {
 
     const handleUpload = async () => {
         if (!selectedFile) {
-          Swal.fire("Error", "Please select a file to upload", "error");
-          return;
+            Swal.fire("Error", "Please select a file to upload", "error");
+            return;
         }
-      
+
         const formData = new FormData();
         formData.append("file", selectedFile);
-      
+
         try {
-          const response = await axios.post("http://localhost:5000/api/auth/posts", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-      
-          Swal.fire("Success", "Post created successfully!", "success", response.data.message);
-          setIsCreateModalOpen(false);
-          setSelectedFile(null);
+            const response = await axios.post("http://localhost:5000/api/auth/posts", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            Swal.fire("Success", "Post created successfully!", "success", response.data.message);
+            setIsCreateModalOpen(false);
+            setSelectedFile(null);
         } catch (err) {
-          console.error("Error uploading post:", err.message);
-          Swal.fire("Error", "Error uploading post!", "error");
+            console.error("Error uploading post:", err.message);
+            Swal.fire("Error", "Error uploading post!", "error");
         }
-      };
-      
+    };
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await axios.get("http://localhost:5000/api/auth/notifications", {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                });
+                setUnreadCount(response.data.filter((n) => !n.isRead).length);
+            } catch (err) {
+                console.error("Error fetching notifications", err.message);
+            }
+        };
+
+        fetchNotifications();
+    }, []);
+
 
     const handleLogOut = () => {
         Swal.fire({
@@ -101,25 +116,33 @@ const Navbar = () => {
                 </Link>
                 <Link to={''}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i className="fa-regular fa-message text-red-600 mt-2 "></i>
+                        <i className="fa-regular fa-message text-red-600 mt-2 "></i>
                         <p>Messages</p>
                     </span>
                 </Link>
                 <Link to={'/reels'}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i className="fa-solid fa-film text-red-600 mt-[0.40rem]"></i>
+                        <i className="fa-solid fa-film text-red-600 mt-[0.40rem]"></i>
                         <p>Reels</p>
                     </span>
                 </Link>
-                <Link to={''}>
+                <Link to={'/notifications'}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
-                    <i className="fa-solid fa-bell text-red-600 mt-[0.40rem]"></i>
-                        <p>Notifications</p>
+                        <i className="fa-solid fa-bell text-red-600 mt-[0.40rem]"></i>
+                        <div className='flex space-x-[1px]'>
+                            <p>Notifications</p>
+                            {unreadCount > 0 && (
+                                <div className='w-5 h-5 -my-1 -mx-2 rounded-full flex items-center text-center justify-center bg-red-600'><span className=" text-xs text-white  rounded-full">
+                                    {unreadCount}
+                                </span></div>
+
+                            )}
+                        </div>
                     </span>
                 </Link>
                 <Link to={''}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105' onClick={() => setIsCreateModalOpen(true)}>
-                    <i className="fa-solid fa-plus text-red-600 mt-[0.42rem]"></i>
+                        <i className="fa-solid fa-plus text-red-600 mt-[0.42rem]"></i>
                         <p>Create</p>
                     </span>
                 </Link>
@@ -154,8 +177,8 @@ const Navbar = () => {
                     </div>
                 </Modal>
             </div>
-            <div className='flex space-x-1 p-8  text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
-            <i className="fa-solid fa-arrow-right-from-bracket text-red-600 mt-[0.7rem]"></i>
+            <div className='flex space-x-1 p-8 text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
+                <i className="fa-solid fa-arrow-right-from-bracket text-red-600 mt-[0.7rem]"></i>
                 <p className='text-2xl'>Logout</p>
             </div>
         </nav>
