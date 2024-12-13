@@ -57,46 +57,54 @@ const MainFeed = () => {
       console.error("Error liking post:", err.message);
     }
   };
-  
 
   return (
-    <div className="px-5 flex space-x-10 mx-8 mt-10">
-      <div className="flex flex-wrap gap-6 w-full justify-center">
+  <div className="flex space-x-12">
+      <div className="flex flex-wrap w-full mt-5 justify-center">
         {posts.map((post) => (
           <div
-            className="bg-white shadow-lg w-full sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[600px] min-h-[400px] rounded-md mb-6 p-5 flex flex-col items-center"
+            className="bg-white shadow-lg w-[500px] min-h-[600px] rounded-md mb-6 p-5 flex flex-col items-center"
             key={post._id}
           >
             <div className="font-semibold flex pb-3 border-b-2 w-full">
               <img
                 src={post.user?.profilePhoto || profileIcon}
                 alt="Profile"
-                className="h-10 w-10 rounded-full mr-3 ring-2 ring-gray-300"
+                className="h-10 w-10 object-contain rounded-full mr-3 ring-2 ring-gray-300"
               />
               <span className="self-center text-xl">{post.user?.username || "Unknown User"}</span>
             </div>
 
-            {post.mediaType === "video" ? (
-              <video
-                controls
-                src={post.mediaUrl}
-                className="w-full h-[300px] object-contain rounded-md mt-3"
-              />
-            ) : (
-              <img
-                src={post.mediaUrl}
-                alt="Post"
-                className="w-full h-auto object-contain rounded-md mt-3"
-              />
+            {/* Media (Image or Video) */}
+            <div className="w-full h-[400px] mt-3">
+              {post.mediaType === "video" ? (
+                <video
+                  controls
+                  src={post.mediaUrl}
+                  className="w-full h-full object-contain rounded-md"
+                />
+              ) : (
+                <img
+                  src={post.mediaUrl}
+                  alt="Post"
+                  className="w-full h-full object-contain rounded-md"
+                />
+              )}
+            </div>
+
+            {/* Caption */}
+            {post.caption && (
+              <div className="mr-auto mt-4 text-sm text-gray-700">{post.caption}</div>
             )}
 
-            <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2">
+            {/* Like, Timestamp */}
+            <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2 pt-2">
               <button
-                className={`flex items-center text-sm ${post.isLiked ? 'text-blue-500' : 'text-gray-400'}`}
+                className={`flex items-center text-sm ${post.isLiked ? "text-blue-500" : "text-gray-400"}`}
                 onClick={() => handleLike(post._id, post.isLiked)}
               >
-                <i className="fa-solid fa-thumbs-up mx-1 mt-2"></i>
-                <span className="mt-2">{post.likes} likes</span>
+                <i className="fa-solid fa-thumbs-up mx-1"></i>
+                <span>{post.likes} likes</span>
               </button>
               <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
             </div>
@@ -104,10 +112,10 @@ const MainFeed = () => {
         ))}
       </div>
 
-      <div className="px-2">
-        <SuggestedUsers />
-      </div>
+    <div className="mt-7">
+      <SuggestedUsers />
     </div>
+  </div>
   );
 };
 

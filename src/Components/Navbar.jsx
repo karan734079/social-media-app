@@ -13,6 +13,7 @@ const Navbar = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [caption, setCaption] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,14 +37,15 @@ const Navbar = () => {
     };
 
     const handleUpload = async () => {
-        if (!selectedFile) {
-            Swal.fire("Error", "Please select a file to upload", "error");
+        if (!selectedFile || !caption.trim()) {
+            Swal.fire("Error", "Please select a file and add a caption", "error");
             return;
         }
-
+    
         const formData = new FormData();
         formData.append("file", selectedFile);
-
+        formData.append("caption", caption);  // Add caption to form data
+    
         try {
             const response = await axios.post("http://localhost:5000/api/auth/posts", formData, {
                 headers: {
@@ -51,10 +53,11 @@ const Navbar = () => {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
-
+    
             Swal.fire("Success", "Post created successfully!", "success", response.data.message);
             setIsCreateModalOpen(false);
             setSelectedFile(null);
+            setCaption('');  // Clear the caption input
         } catch (err) {
             console.error("Error uploading post:", err.message);
             Swal.fire("Error", "Error uploading post!", "error");
@@ -102,7 +105,7 @@ const Navbar = () => {
                     <img
                         src={profilePhoto || profileIcon}
                         alt="Profile"
-                        className="h-9 w-9 rounded-full mb-5 ring-2 ring-gray"
+                        className="h-9 w-9 object-contain rounded-full mb-5 ring-2 ring-gray-200"
                     />
                     <p className='font-semibold text-2xl'>{profileName}</p>
                 </span>
@@ -148,34 +151,40 @@ const Navbar = () => {
                 </Link>
 
                 <Modal
-                    isOpen={isCreateModalOpen}
-                    onRequestClose={() => setIsCreateModalOpen(false)}
-                    className="flex justify-center items-center mx-[35rem] my-[15rem] max-w-lg w-full bg-red-600 rounded-lg shadow-lg p-6"
-                    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        isOpen={isCreateModalOpen}
+        onRequestClose={() => setIsCreateModalOpen(false)}
+        className="flex justify-center items-center mx-[35rem] my-[15rem] max-w-lg w-full bg-red-600 rounded-lg shadow-lg p-6"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+    >
+        <div className="w-full max-w-md mx-auto">
+            <h2 className="text-2xl text-center mb-4 font-bold">Create a Post</h2>
+            <input
+                type="file"
+                onChange={handleFileChange}
+                className="w-full p-2 rounded-lg mb-4 cursor-pointer"
+            />
+            <textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Write a caption..."
+                className="w-full p-2 rounded-lg mb-4"
+            />
+            <div className="flex justify-between space-x-4">
+                <button
+                    onClick={handleUpload}
+                    className="bg-black text-white py-2 px-4 rounded-md hover:bg-gray-950 transition-colors w-full"
                 >
-                    <div className="w-full max-w-md mx-auto">
-                        <h2 className="text-2xl text-center mb-4 font-bold">Create a Post</h2>
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            className="w-full p-2  rounded-lg mb-4 cursor-pointer"
-                        />
-                        <div className="flex justify-between space-x-4">
-                            <button
-                                onClick={handleUpload}
-                                className="bg-black text-white py-2 px-4 rounded-md hover:bg-gray-950 transition-colors w-full"
-                            >
-                                Upload
-                            </button>
-                            <button
-                                onClick={() => setIsCreateModalOpen(false)}
-                                className="bg-white text-black py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
+                    Upload
+                </button>
+                <button
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="bg-white text-black py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </Modal>
             </div>
             <div className='flex space-x-1 p-8 text-center font-semibold transition-transform transform hover:scale-105' onClick={handleLogOut}>
                 <i className="fa-solid fa-arrow-right-from-bracket text-red-600 mt-[0.7rem]"></i>

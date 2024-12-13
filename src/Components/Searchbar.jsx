@@ -54,7 +54,7 @@ const Searchbar = () => {
 
     return (
         <div className="p-4">
-            <div className="relative">
+            <div className="relative right-40">
                 <div className="flex w-full max-w-lg ml-96 border rounded-full shadow focus:outline-none">
                     <input
                         type="text"
@@ -78,7 +78,7 @@ const Searchbar = () => {
                                     <img
                                         src={user.profilePhoto}
                                         alt={`${user.username}'s profile`}
-                                        className="w-10 h-10 rounded-full mr-4"
+                                        className="w-10 h-10 object-contain rounded-full mr-4"
                                     />
                                     <div>
                                         <h3 className="text-sm font-semibold">{user.name}</h3>

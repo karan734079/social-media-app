@@ -1,6 +1,10 @@
 import React from "react";
 import { Provider } from "react-redux";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import "./App.css";
 import store from "./utils/store";
 import Body from "./Components/Body";
@@ -34,7 +38,9 @@ const appRouter = createBrowserRouter([
     path: "/browse",
     element: (
       <ProtectedRoute>
-        <Body />
+        <ProtectedLayout>
+          <Body />
+        </ProtectedLayout>
       </ProtectedRoute>
     ),
   },
@@ -83,7 +89,7 @@ const appRouter = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <ProtectedLayout>
-          <Notifications/>
+          <Notifications />
         </ProtectedLayout>
       </ProtectedRoute>
     ),

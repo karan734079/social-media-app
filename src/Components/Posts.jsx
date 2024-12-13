@@ -79,10 +79,10 @@ const Posts = () => {
   };
 
   return (
-    <div className="grid  sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 px-5 mt-10">
+    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-5 mt-10">
       {posts.map((post) => (
         <div
-          className="bg-white shadow-md rounded-md p-4 flex flex-col justify-between items-center"
+          className="bg-white shadow-md rounded-md p-4 flex flex-col justify-between items-center max-w-[400px] w-full"
           key={post._id}
         >
           <div className="font-semibold flex justify-between w-full pb-3 border-b-2">
@@ -90,7 +90,7 @@ const Posts = () => {
               <img
                 src={post.user?.profilePhoto || profileIcon}
                 alt="Profile"
-                className="h-7 w-7 rounded-full ring-2 ring-red-600"
+                className="h-10 w-10 rounded-full object-contain ring-2 ring-gray-200"
               />
               <span className="text-md">{post.user?.username || "Unknown User"}</span>
             </div>
@@ -109,17 +109,21 @@ const Posts = () => {
             <video
               controls
               src={post.mediaUrl}
-              className="w-full max-h-[400px] object-contain rounded-md mt-3"
+              className="w-full h-[400px] object-cover rounded-md mt-3"
             />
           ) : (
             <img
               src={post.mediaUrl}
               alt="Post"
-              className="w-full max-h-[400px] object-contain rounded-md mt-3"
+              className="w-full h-[400px] object-cover rounded-md mt-3"
             />
           )}
 
-          <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2">
+          <div className="mr-auto mt-2 text-sm">
+            {post.caption}
+          </div>
+
+          <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2 pt-2">
             <button
               className={`flex items-center text-sm ${post.isLiked ? 'text-blue-500' : 'text-gray-400'}`}
               onClick={() => handleLike(post._id, post.isLiked)}

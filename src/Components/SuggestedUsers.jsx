@@ -32,7 +32,7 @@ const SuggestedUsers = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="bg-white shadow-md p-5 rounded-md overflow-y-auto max-h-96 w-[400px] scroll-bar">
+    <div className="bg-white shadow-md p-5 rounded-md overflow-y-auto max-h-96 w-full sm:w-[350px] lg:w-[400px] scroll-bar">
       <h3 className="mb-4 font-extralight text-2xl">Suggested for you</h3>
       {suggestedUsers &&
         suggestedUsers.map((user) => (
@@ -45,7 +45,7 @@ const SuggestedUsers = () => {
                 <img
                   src={user.profilePhoto}
                   alt={`${user.username}'s profile`}
-                  className="w-8 h-8 rounded-full ring-2 ring-gray-300"
+                  className="w-8 h-8 rounded-full ring-2 object-contain ring-gray-300"
                 />
                 <div className="text-lg">{user.username}</div>
               </div>
@@ -65,7 +65,7 @@ const SuggestedUsers = () => {
                   <img
                     src={user.profilePhoto}
                     alt={`${user.username}'s profile`}
-                    className="w-16 h-16 rounded-full ring-2 ring-gray-300"
+                    className="w-16 h-16 rounded-full object-contain bg-white ring-2 ring-gray-300"
                   />
                   <div>
                     <h2 className="text-xl text-black font-semibold">{user.name}</h2>
@@ -80,7 +80,7 @@ const SuggestedUsers = () => {
                   Message
                 </button>
                 <button
-                  className="mt-4 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900 ml-5"
+                  className="mt-4 px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900 ml-1"
                   onClick={() => handleViewPosts(user._id)}
                 >
                   {postsVisible[user._id] ? 'Hide Posts' : `See ${user.name}'s Posts`}

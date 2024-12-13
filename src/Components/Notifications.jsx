@@ -68,7 +68,7 @@ const Notifications = () => {
                                     <p className="text-sm text-gray-800 flex">
                                         <span><img src={notification.fromUser.profilePhoto} alt="" className="h-7 w-7 rounded-full mr-2" /></span>
                                         <span className="font-bold mr-2">{notification.fromUser.username}</span> posted a new{" "}
-                                        {notification.post.mediaType}.
+                                        {notification.post && notification.post.mediaType ? notification.post.mediaType : "content"}.
                                     </p>
                                 )}
                             </div>
@@ -82,13 +82,13 @@ const Notifications = () => {
                                         Mark as Read
                                     </button>
                                 )}
-                                    <button
-                                        onClick={() => deleteNotification(notification._id)}
-                                        className="text-red-600 text-sm hover:text-red-700 transition-transform transform hover:scale-105"
-                                    >
-                                       Delete
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={() => deleteNotification(notification._id)}
+                                    className="text-red-600 text-sm hover:text-red-700 transition-transform transform hover:scale-105"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
 
                         {/* Time in top-right corner */}

@@ -1,16 +1,12 @@
 import React from 'react'
-import Navbar from './Navbar'
 import MainFeed from './MainFeed'
 import Searchbar from './Searchbar'
 
 const Body = () => {
   return (
-    <div className='flex'>
-      <Navbar />
-      <div className='ml-52'>
+    <div className='mr-64'>
       <Searchbar />
       <MainFeed />
-      </div>
     </div>
   )
 }
