@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import Lottie from 'lottie-react';
@@ -8,10 +8,11 @@ import create from '../images/animations/robo.json'
 const CreateProfile = () => {
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
-    const [username, setUsername] = useState('');
+    // const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const navigate = useNavigate();
+    const { username } = useParams();
 
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
@@ -96,10 +97,10 @@ const CreateProfile = () => {
                                 <input
                                     type="text"
                                     value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    // onChange={(e) => setUsername(e.target.value)}
                                     className="w-full px-4 py-3 rounded bg-gray-100  focus:outline-none"
                                     placeholder='Username'
-                                    required
+                                    readOnly
                                 />
                             </div>
                             <div className="mb-4">

@@ -33,7 +33,7 @@ const ProtectedLayout = ({ children }) => (
 const appRouter = createBrowserRouter([
   { path: "/", element: <Login /> },
   { path: "/sign-up", element: <SignUp /> },
-  { path: "/create-profile", element: <CreateProfile /> },
+  { path: "/create-profile/:username", element: <CreateProfile /> },
   {
     path: "/browse",
     element: (

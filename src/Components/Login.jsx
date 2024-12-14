@@ -26,7 +26,7 @@ const Login = () => {
         icon: "success",
         confirmButtonText: "OK",
       }).then(() => {
-        const redirectPath = response.data.isProfileComplete ? "/browse" : "/create-profile";
+        const redirectPath = response.data.isProfileComplete ? "/browse" : `/create-profile/${username}`;
         navigate(redirectPath);
       });
     } catch (err) {
