@@ -26,7 +26,7 @@ const SignUp = () => {
       }).then(() => navigate('/'));
 
     } catch (err) {
-      alert(err.response?.data?.message || 'Error Signing Up');
+      alert(err.response?.data?.message || 'Error  Signing Up');
     }
   };
 
