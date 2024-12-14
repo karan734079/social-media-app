@@ -15,7 +15,7 @@ const SignUp = () => {
     e.preventDefault();
   
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/sign-up', { email, username, password });
+      const response = await axios.post('api/auth/sign-up', { email, username, password });
 
       Swal.fire({
         title: "Account Created Successfully",

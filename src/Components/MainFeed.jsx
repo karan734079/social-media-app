@@ -11,7 +11,7 @@ const MainFeed = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/profile", {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setCurrentUserId(response.data._id);
@@ -26,7 +26,7 @@ const MainFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/auth/getPosts`, {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/getPosts`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setPosts(response.data);
@@ -41,7 +41,7 @@ const MainFeed = () => {
   const handleLike = async (postId, isLiked) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/auth/posts/${postId}/like`,
+        `${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

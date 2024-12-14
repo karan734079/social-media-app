@@ -6,7 +6,7 @@ export const fetchSuggestedUsers = createAsyncThunk(
   "users/fetchSuggestedUsers",
   async (_, { getState }) => {
     const token = localStorage.getItem("token");
-    const { data } = await axios.get("http://localhost:5000/api/auth/users", {
+    const { data } = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
@@ -18,7 +18,7 @@ export const fetchUserPosts = createAsyncThunk(
   async (userId, { getState }) => {
     const token = localStorage.getItem("token");
     const { data } = await axios.get(
-      `http://localhost:5000/api/auth/getPosts?filter=userId&userId=${userId}`,
+      `${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=userId&userId=${userId}`,
   {
     headers: { Authorization: `Bearer ${token}` },
   }
@@ -33,7 +33,7 @@ export const toggleFollowUser = createAsyncThunk(
   async (userId, { getState }) => {
     const token = localStorage.getItem("token");
     const { data } = await axios.post(
-      `http://localhost:5000/api/auth/users/${userId}/toggle-follow`,
+      `${process.env.REACT_APP_BASE_URL}api/auth/users/${userId}/toggle-follow`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },

@@ -19,7 +19,7 @@ const Navbar = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/auth/profile", {
+                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
                 setProfilePhoto(response.data.profilePhoto || profileIcon);
@@ -47,7 +47,7 @@ const Navbar = () => {
         formData.append("caption", caption);  // Add caption to form data
     
         try {
-            const response = await axios.post("http://localhost:5000/api/auth/posts", formData, {
+            const response = await axios.post(`${process.env.REACT_APP_BASE_URL}api/auth/posts`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -67,7 +67,7 @@ const Navbar = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/auth/notifications", {
+                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/notifications`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
                 setUnreadCount(response.data.filter((n) => !n.isRead).length);

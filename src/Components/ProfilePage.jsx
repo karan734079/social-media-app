@@ -13,7 +13,7 @@ const Profile = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const response = await axios.get('http://localhost:5000/api/auth/profile', {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setProfile(response.data);
@@ -26,7 +26,7 @@ const Profile = () => {
         if (showFollowers) {
             setShowFollowers(false);
         } else {
-            const response = await axios.get('http://localhost:5000/api/auth/followers', {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/followers`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setFollowers(response.data);
@@ -38,7 +38,7 @@ const Profile = () => {
         if (showFollowing) {
             setShowFollowing(false);
         } else {
-            const response = await axios.get('http://localhost:5000/api/auth/following', {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             setFollowing(response.data);
@@ -62,7 +62,7 @@ const Profile = () => {
         formData.append('address', profile.address);
 
         try {
-            const response = await axios.put('http://localhost:5000/api/auth/profile', formData, {
+            const response = await axios.put(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, formData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'multipart/form-data',

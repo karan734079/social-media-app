@@ -35,7 +35,7 @@ const CreateProfile = () => {
 
         try {
             await axios.put(
-                "http://localhost:5000/api/auth/profile",
+                `${process.env.REACT_APP_BASE_URL}api/auth/profile`,
                 formData,
                 {
                     headers: {

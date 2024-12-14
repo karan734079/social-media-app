@@ -26,7 +26,7 @@ const Searchbar = () => {
 
         const handleSearch = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/auth/users/search?query=${debouncedQuery}`, {
+                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/users/search?query=${debouncedQuery}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
 

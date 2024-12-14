@@ -10,7 +10,7 @@ const Posts = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/profile", {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setUserId(response.data._id);
@@ -26,7 +26,7 @@ const Posts = () => {
     const fetchPosts = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/auth/getPosts?filter=currentUser`,
+          `${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=currentUser`,
           {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           }
@@ -43,7 +43,7 @@ const Posts = () => {
   const handleLike = async (postId, isLiked) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/auth/posts/${postId}/like`,
+        `${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -68,7 +68,7 @@ const Posts = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:5000/api/auth/posts/${postId}`, {
+      await axios.delete(`${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 

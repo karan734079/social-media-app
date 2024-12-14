@@ -12,7 +12,7 @@ const PostsList = ({ posts: initialPosts, className = 'grid grid-cols-1 gap-4', 
   const handleLike = async (postId, isLiked) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/auth/posts/${postId}/like`,
+        `${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },

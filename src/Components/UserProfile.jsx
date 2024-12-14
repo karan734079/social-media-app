@@ -19,22 +19,22 @@ const UserProfile = () => {
       try {
         setLoading(true);
 
-        const userResponse = await axios.get(`http://localhost:5000/api/auth/profile?userId=${userId}`, {
+        const userResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile?userId=${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setUser(userResponse.data);
 
-        const postsResponse = await axios.get(`http://localhost:5000/api/auth/getPosts?filter=userId&userId=${userId}`, {
+        const postsResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=userId&userId=${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setUserPosts(postsResponse.data);
 
-        const followersResponse = await axios.get(`http://localhost:5000/api/auth/followers?userId=${userId}`, {
+        const followersResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/followers?userId=${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setFollowers(followersResponse.data);
 
-        const followingResponse = await axios.get(`http://localhost:5000/api/auth/following?userId=${userId}`, {
+        const followingResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following?userId=${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setFollowing(followingResponse.data);

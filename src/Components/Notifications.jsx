@@ -10,7 +10,7 @@ const Notifications = () => {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/auth/notifications", {
+                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/notifications`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
                 setNotifications(response.data);
@@ -25,7 +25,7 @@ const Notifications = () => {
 
     const markAsRead = async (id) => {
         try {
-            await axios.put(`http://localhost:5000/api/auth/notifications/${id}/read`, null, {
+            await axios.put(`${process.env.REACT_APP_BASE_URL}api/auth/notifications/${id}/read`, null, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)));
@@ -37,7 +37,7 @@ const Notifications = () => {
 
     const deleteNotification = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/auth/notifications/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_BASE_URL}api/auth/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             setNotifications((prev) => prev.filter((n) => n._id !== id));
