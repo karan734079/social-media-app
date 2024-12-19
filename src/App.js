@@ -17,6 +17,7 @@ import Reels from "./Components/Reels";
 import Searchbar from "./Components/Searchbar";
 import UserProfile from "./Components/UserProfile";
 import Notifications from "./Components/Notifications";
+import Chat from "./Components/Chat";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -26,7 +27,7 @@ const ProtectedRoute = ({ children }) => {
 const ProtectedLayout = ({ children }) => (
   <div className="flex">
     <Navbar />
-    <div className="ml-96">{children}</div>
+    <div className="ml-80 w-full">{children}</div>
   </div>
 );
 
@@ -90,6 +91,16 @@ const appRouter = createBrowserRouter([
       <ProtectedRoute>
         <ProtectedLayout>
           <Notifications />
+        </ProtectedLayout>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/chat",
+    element: (
+      <ProtectedRoute>
+        <ProtectedLayout>
+          <Chat/>
         </ProtectedLayout>
       </ProtectedRoute>
     ),

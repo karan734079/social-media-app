@@ -137,9 +137,7 @@ const Profile = () => {
                         </ul>
                     </div>
                 )}
-                <div className="mt-8 w-full max-w-4xl">
-                    <h1 className='text-3xl font-semibold m-5 text-red-600'>Posts:</h1>
-                    <Posts />
+                <div className="mt-8 w-full max-w-4xl">                    <Posts />
                 </div>
             </div>
 

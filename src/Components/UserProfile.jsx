@@ -131,7 +131,6 @@ const UserProfile = () => {
         )}
 
         <div className="mt-8 w-full max-w-4xl">
-          <h1 className="text-3xl font-semibold m-5 text-red-600">Posts:</h1>
           <PostsList posts={userPosts} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
         </div>
       </div>

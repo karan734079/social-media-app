@@ -59,11 +59,11 @@ const MainFeed = () => {
   };
 
   return (
-  <div className="flex space-x-12">
-      <div className="flex flex-wrap w-full mt-5 justify-center">
+  <div className="flex">
+      <div className="flex w-[500px] flex-wrap m-5 justify-start">
         {posts.map((post) => (
           <div
-            className="bg-white shadow-lg w-[500px] min-h-[600px] rounded-md mb-6 p-5 flex flex-col items-center"
+            className="bg-white shadow-lg w-full min-h-[600px] rounded-md mb-6 p-5 flex flex-col items-center"
             key={post._id}
           >
             <div className="font-semibold flex pb-3 border-b-2 w-full">
@@ -112,7 +112,7 @@ const MainFeed = () => {
         ))}
       </div>
 
-    <div className="mt-7">
+    <div className="mt-6">
       <SuggestedUsers />
     </div>
   </div>

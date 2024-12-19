@@ -3,7 +3,8 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import robo from '../images/animations/robot.json'
 import axios from 'axios';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
+import { ToastContainer, toast } from 'react-toastify';
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -13,20 +14,36 @@ const SignUp = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-  
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_BASE_URL}api/auth/sign-up`, { email, username, password });
 
-      Swal.fire({
-        title: "Account Created Successfully",
-        text: response.data.message,
-        icon: 'success',
-        confirmButtontext: 'ok',
-        confirmButtonColor : 'red'
-      }).then(() => navigate('/'));
+    try {
+      await axios.post(`${process.env.REACT_APP_BASE_URL}api/auth/sign-up`, { email, username, password });
+
+      toast.success('Account Created successfully', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+      setTimeout(() => {
+        navigate('/');
+      }, 2000)
+
 
     } catch (err) {
-      alert(err.response?.data?.message || 'Error  Signing Up');
+      toast.success('Registartion failed', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
     }
   };
 
@@ -80,6 +97,7 @@ const SignUp = () => {
             <Lottie className='w-[400px] h-[500px] mb-4' animationData={robo} />
           </div>
         </div>
+        <ToastContainer />
       </div>
     </div>
   )

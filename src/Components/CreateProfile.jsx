@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 import axios from 'axios';
 import Lottie from 'lottie-react';
 import create from '../images/animations/robo.json'
+import { ToastContainer, toast } from 'react-toastify';
 
 const CreateProfile = () => {
     const [profilePhoto, setProfilePhoto] = useState(null);
@@ -46,17 +47,28 @@ const CreateProfile = () => {
                 }
             );
 
-            Swal.fire({
-                title: "Profile Created Successfully",
-                icon: "success",
-                confirmButtonText: "OK",
-            }).then(() => navigate("/browse"));
+            toast.success('Profile Created successfully', {
+                position: 'top-right',
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+            })
+            setTimeout(() => navigate("/browse"), 2000);
         } catch (err) {
-            Swal.fire(
-                "Error",
-                err.response?.data?.message || "Error saving profile",
-                "error"
-            );
+            toast.error('Error Creating Profile', {
+                position: 'top-right',
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+            });
         }
     };
 
@@ -78,7 +90,7 @@ const CreateProfile = () => {
                                 <img
                                     src={photoPreview}
                                     alt="Profile Preview"
-                                    className="w-24 h-24 rounded-full mx-auto object-cover border-2 border-white"
+                                    className="w-24 h-24 rounded-full bg-white mx-auto object-contain border-2 border-white"
                                 />
                             ) : (
                                 <div className="w-24 h-24 rounded-full mx-auto bg-white flex items-center justify-center text-gray-500">
@@ -133,6 +145,7 @@ const CreateProfile = () => {
                     </div>
                 </form>
             </div>
+            <ToastContainer />
         </>
     );
 };

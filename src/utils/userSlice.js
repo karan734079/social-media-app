@@ -13,20 +13,6 @@ export const fetchSuggestedUsers = createAsyncThunk(
   }
 );
 
-export const fetchUserPosts = createAsyncThunk(
-  "users/fetchUserPosts",
-  async (userId, { getState }) => {
-    const token = localStorage.getItem("token");
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=userId&userId=${userId}`,
-  {
-    headers: { Authorization: `Bearer ${token}` },
-  }
-    );
-    return { userId, posts: data };
-  }
-);
-
 // Follow/unfollow user
 export const toggleFollowUser = createAsyncThunk(
   "users/toggleFollowUser",
@@ -73,19 +59,6 @@ const userSlice = createSlice({
           user.isFollowing = isFollowing; // Update the isFollowing state
         }
       })
-      .addCase(fetchUserPosts.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserPosts.fulfilled, (state, action) => {
-        const { userId, posts } = action.payload;
-        state.loading = false;
-        state.userPosts[userId] = posts; // Store posts for the specific user
-      })
-      .addCase(fetchUserPosts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      });
   },
 });
 

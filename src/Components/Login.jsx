@@ -1,13 +1,13 @@
 import Lottie from 'lottie-react';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import robo from '../images/animations/create.json'
+import robo from '../images/animations/create.json';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { ToastContainer, toast } from 'react-toastify';
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -19,27 +19,47 @@ const Login = () => {
         { username, password }
       );
 
-      localStorage.setItem("token", response.data.token);
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.token);
 
-      Swal.fire({
-        title: "Login Successful",
-        icon: "success",
-        confirmButtonText: "OK",
-      }).then(() => {
-        const redirectPath = response.data.isProfileComplete ? "/browse" : `/create-profile/${username}`;
-        navigate(redirectPath);
+      // Show success toast and wait for it to complete before navigating
+      toast.success('Login successful!', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
       });
+
+      setTimeout(() => {
+        const redirectPath = response.data.isProfileComplete ? '/browse' : `/create-profile/${username}`;
+        navigate(redirectPath);
+      }, 2000);
+
     } catch (err) {
-      Swal.fire("Error", err.response?.data?.message || "Error logging in", "error");
+      // Show error toast on login failure
+      toast.error('Login failed. Please check your credentials.', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
     }
   };
 
   return (
-    <div className='items-center text-center justify-center'>
+    <div className="items-center text-center justify-center">
       <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
       <div className="flex items-center justify-center bg-white text-black space-x-5">
         <div>
-          <Lottie className='w-[500px] h-[550px] m-2' animationData={robo} />
+          <Lottie className="w-[500px] h-[550px] m-2" animationData={robo} />
         </div>
         <div className="flex flex-col items-center bg-red-600 px-8 py-14 space-y-4 max-w-sm w-full rounded-lg opacity-95">
           <form className="w-full space-y-4" onSubmit={handleLogin}>
@@ -54,7 +74,7 @@ const Login = () => {
             <input
               type="password"
               placeholder="Password"
-              className="w-full px-4 py-3 rounded bg-gray-100  focus:outline-none"
+              className="w-full px-4 py-3 rounded bg-gray-100 focus:outline-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -72,10 +92,11 @@ const Login = () => {
               SignUp
             </Link>
           </div>
+          <ToastContainer />
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default Login
+export default Login;

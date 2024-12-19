@@ -5,3 +5,7 @@
 .scroll-bar::-webkit-scrollbar{
     display: none;
 }
+
+.file{
+    display: none;
+}

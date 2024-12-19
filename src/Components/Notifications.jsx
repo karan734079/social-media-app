@@ -48,7 +48,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="w-[500px] mx-auto py-6 px-4 overflow-y-auto h-screen scroll-bar">
+        <div className="w-[500px] py-6 px-4 overflow-y-auto h-screen scroll-bar ">
             <h2 className="text-2xl font-semibold text-red-600 mb-4">Notifications ({unreadCount})</h2>
             <ul>
                 {notifications.map((notification) => (
@@ -61,14 +61,14 @@ const Notifications = () => {
                             <div>
                                 {notification.type === "follow" ? (
                                     <p className="text-sm flex text-gray-800">
-                                        <span><img src={notification.fromUser.profilePhoto} alt="" className="h-7 w-7 rounded-full mr-2" /></span>
-                                        <span className="font-bold mr-2">{notification.fromUser.username}</span> started following you.
+                                        <span><img src={notification?.fromUser?.profilePhoto} alt="" className="h-7 w-7 rounded-full mr-2" /></span>
+                                        <span className="font-bold mr-2">{notification?.fromUser?.username}</span> started following you.
                                     </p>
                                 ) : (
                                     <p className="text-sm text-gray-800 flex">
-                                        <span><img src={notification.fromUser.profilePhoto} alt="" className="h-7 w-7 rounded-full mr-2" /></span>
-                                        <span className="font-bold mr-2">{notification.fromUser.username}</span> posted a new{" "}
-                                        {notification.post && notification.post.mediaType ? notification.post.mediaType : "content"}.
+                                        <span><img src={notification?.fromUser?.profilePhoto} alt="" className="h-7 w-7 rounded-full mr-2" /></span>
+                                        <span className="font-bold mr-2">{notification?.fromUser?.username}</span> posted a new{" "}
+                                        {notification?.post?.mediaType ? notification?.post?.mediaType : "content"}.
                                     </p>
                                 )}
                             </div>
@@ -101,5 +101,6 @@ const Notifications = () => {
         </div>
     );
 };
+
 
 export default Notifications;

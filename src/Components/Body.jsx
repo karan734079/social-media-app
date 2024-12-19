@@ -4,9 +4,11 @@ import Searchbar from './Searchbar'
 
 const Body = () => {
   return (
-    <div className='mr-64'>
+    <div className=''>
       <Searchbar />
-      <MainFeed />
+      <div className='flex justify-start'>
+        <MainFeed />
+      </div>
     </div>
   )
 }
