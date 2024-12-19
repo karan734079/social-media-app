@@ -16,6 +16,7 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [caption, setCaption] = useState('');
     const [imagePreview, setImagePreview] = useState(null);
+    const [id, setId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,6 +27,7 @@ const Navbar = () => {
                 });
                 setProfilePhoto(response.data.profilePhoto || profileIcon);
                 setProfileName(response.data.name || "Guest");
+                setId(response.data._id);
             } catch (err) {
                 console.error("Failed to fetch profile", err.message);
             }
@@ -161,7 +163,7 @@ const Navbar = () => {
                         <p>Home</p>
                     </span>
                 </Link>
-                <Link to={'/chat'}>
+                <Link to={`/chat/${id}`}>
                     <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
                         <i className="fa-regular fa-message text-red-600 mt-2 "></i>
                         <p>Messages</p>

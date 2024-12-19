@@ -1,59 +1,53 @@
-import React, { useEffect, useRef, useState } from "react";
-import EmojiPicker from "emoji-picker-react";
-import profilePhoto from "../images/Screenshot 2024-05-08 221135.png";
-import axios from "axios";
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import EmojiPicker from 'emoji-picker-react';
+import profilePhoto from '../images/Screenshot 2024-05-08 221135.png';
+import axios from 'axios';
+import {
+    // setMessages,
+    addMessage,
+    setSelectedUsers,
+    toggleAddUserModal,
+    setQuery,
+    setSearchResults,
+    setIsNotFound,
+    setSelectedUser,
+} from '../utils/chatSlice';
 
 const Chat = () => {
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState([
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hello! I have a question about your services.", isSender: true },
-        { text: "Sure, feel free to ask!", isSender: false },
-        { text: "What are your pricing plans?", isSender: true },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hello! I have a question about your services.", isSender: true },
-        { text: "Sure, feel free to ask!", isSender: false },
-        { text: "What are your pricing plans?", isSender: true },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hello! I have a question about your services.", isSender: true },
-        { text: "Sure, feel free to ask!", isSender: false },
-        { text: "What are your pricing plans?", isSender: true },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hi! How can I help you today?", isSender: false },
-        { text: "Hello! I have a question about your services.", isSender: true },
-        { text: "Sure, feel free to ask!", isSender: false },
-        { text: "What are your pricing plans?", isSender: true },
-        { text: "Hi! How can I help you today?", isSender: false },
-    ]);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [addUser, setAddUser] = useState(false);
-    const [query, setQuery] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [debouncedQuery, setDebouncedQuery] = useState("");
-    const [isNotFound, setIsNotFound] = useState(false);
-    const [selectedUsers, setSelectedUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const dispatch = useDispatch();
+    const {
+        messages,
+        addUserModal,
+        query,
+        searchResults,
+        isNotFound,
+        selectedUsers,
+        selectedUser,
+    } = useSelector((state) => state.chat);
+
+    const [message, setMessage] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
     const endRef = useRef(null);
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" });
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
     const onEmojiClick = (emojiObject) => {
         setMessage((prev) => prev + emojiObject.emoji);
     };
+
     const handleSendMessage = () => {
-        setMessages((prev) => [
-            ...prev,
-            { text: message, isSender: true },
-        ]);
-        setMessage("");  // Clear the input field after sending the message
+        if (message.trim()) {
+            dispatch(addMessage({ text: message, isSender: true }));
+            setMessage('');
+        }
     };
 
     const closeModal = () => {
-        setAddUser(false);
+        dispatch(toggleAddUserModal());
     };
 
     useEffect(() => {
@@ -66,84 +60,86 @@ const Chat = () => {
 
     useEffect(() => {
         if (!debouncedQuery.trim()) {
-            setSearchResults([]);
-            setIsNotFound(false);
+            dispatch(setSearchResults([]));
+            dispatch(setIsNotFound(false));
             return;
         }
 
         const handleSearch = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/users/search?query=${debouncedQuery}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                });
+                const response = await axios.get(
+                    `${process.env.REACT_APP_BASE_URL}api/auth/users/search?query=${debouncedQuery}`,
+                    {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                    }
+                );
 
                 if (response.data.length === 0) {
-                    setSearchResults([]);
-                    setIsNotFound(true);
+                    dispatch(setSearchResults([]));
+                    dispatch(setIsNotFound(true));
                 } else {
-                    setSearchResults(response.data);
-                    setIsNotFound(false);
+                    dispatch(setSearchResults(response.data));
+                    dispatch(setIsNotFound(false));
                 }
             } catch (err) {
                 console.error('Search error:', err.message);
-                setSearchResults([]);
-                setIsNotFound(true);
+                dispatch(setSearchResults([]));
+                dispatch(setIsNotFound(true));
             }
         };
 
         handleSearch();
-    }, [debouncedQuery]);
+    }, [debouncedQuery, dispatch]);
 
     const viewUserProfile = (userId) => {
         const user = searchResults.find((user) => user._id === userId);
-        setSelectedUser(user);
+        dispatch(setSelectedUser(user));
     };
 
     const handleAddUser = () => {
         if (selectedUser && !selectedUsers.some((user) => user._id === selectedUser._id)) {
-            setSelectedUsers((prev) => [...prev, selectedUser]);
-            setSelectedUser(null);
+            dispatch(setSelectedUsers([...selectedUsers, selectedUser]));
+            dispatch(setSelectedUser(null));
         }
-        setAddUser(false);
+        dispatch(toggleAddUserModal());
     };
 
     return (
-        <div className="h-full w-[100%] flex items-start">
-            <div className="min-h-screen bg-white w-[30%] border-r-[1px]">
-                <div className="flex items-center justify-between p-[1.08rem] text-red-600 font-bold border-b">
+        <div className="h-full w-full flex items-start">
+            {/* Left Sidebar */}
+            <div className="min-h-screen bg-white w-1/3 border-r">
+                <div className="flex items-center justify-between p-4 text-red-600 font-bold border-b">
                     <span className="text-2xl">Chats</span>
                     <button
-                        className="text-red-600 hover:text-red-800 mx-3"
-                        onClick={() => setAddUser((prev) => !prev)}
+                        className="text-red-600 hover:text-red-800"
+                        onClick={() => dispatch(toggleAddUserModal())}
                     >
-                        <i className={"fas fa-plus text-lg"}></i>
+                        <i className="fas fa-plus text-lg"></i>
                     </button>
                 </div>
 
-                {addUser && (
+                {addUserModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <div className="bg-white p-6 rounded-lg w-96">
                             <div className="flex justify-between items-center">
                                 <span className="text-xl text-red-600 font-bold">Add User</span>
-                                <button
-                                    className="text-gray-500 hover:text-gray-700"
-                                    onClick={closeModal}
-                                >
+                                <button className="text-gray-500 hover:text-gray-700" onClick={closeModal}>
                                     <i className="fas fa-times text-xl"></i>
                                 </button>
                             </div>
-                            <div className="flex w-full max-w-lg mt-4 border rounded-full shadow focus:outline-none">
+                            <div className="flex w-full mt-4 border rounded-full shadow focus:outline-none">
                                 <input
                                     type="text"
                                     value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
+                                    onChange={(e) => dispatch(setQuery(e.target.value))}
                                     placeholder="Search for a user..."
-                                    className="w-full max-w-lg rounded-full focus:outline-none p-3"
+                                    className="w-full p-3 rounded-full focus:outline-none"
+                                    aria-label="Search for a user"
                                 />
-                                <i className="fa-solid fa-search text-red-600 m-4 mt-4 cursor-pointer"></i>
+                                <i className="fas fa-search text-red-600 m-4 cursor-pointer"></i>
                             </div>
                             {query.trim() && (
-                                <div className="left-0 right-0 mt-2 w-full max-w-lg bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
+                                <div className="mt-2 w-full bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
                                     {searchResults.length > 0 ? (
                                         searchResults.map((user) => (
                                             <div
@@ -164,63 +160,54 @@ const Chat = () => {
                                         ))
                                     ) : (
                                         isNotFound && (
-                                            <div className="p-4 text-center text-gray-600">
-                                                User not found
-                                            </div>
+                                            <div className="p-4 text-center text-gray-600">User not found</div>
                                         )
                                     )}
                                 </div>
                             )}
-                            <div className="user mt-4">
-                                <button
-                                    className="mt-2 w-full p-2 bg-red-600 text-white rounded"
-                                    onClick={handleAddUser}
-                                >
-                                    Add User
-                                </button>
-                            </div>
+                            <button
+                                className="mt-4 w-full p-2 bg-red-600 text-white rounded"
+                                onClick={handleAddUser}
+                            >
+                                Add User
+                            </button>
                         </div>
                     </div>
                 )}
 
-                <div className="overflow-y-auto h-[calc(100%-4rem)] scroll-bar border-b-[1px]">
+                <div className="overflow-y-auto h-[calc(100%-4rem)]">
                     {selectedUsers.map((user) => (
                         <div
                             key={user._id}
-                            className="text-black cursor-pointer p-3 flex items-center hover:bg-gray-200"
-                            onClick={() => setSelectedUser(user)}
+                            className="cursor-pointer p-3 flex items-center border-b hover:bg-gray-200"
+                            onClick={() => dispatch(setSelectedUser(user))}
                         >
+                            <img
+                                src={user.profilePhoto}
+                                alt=""
+                                className="w-10 h-10 object-contain rounded-full mr-3"
+                            />
                             <div>
-                                <img
-                                    src={user.profilePhoto}
-                                    alt=""
-                                    className="w-10 h-10 object-contain rounded-full bg-white mr-3 ring-1 ring-gray-100"
-                                />
-                            </div>
-                            <div>
-                                <p className="font-medium text-black">{user.name}</p>
-                                <p className="text-sm text-gray-500">
-                                    {messages[messages.length - 1]?.text}
-                                </p>
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-sm text-gray-500">{messages[messages.length - 1]?.text}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="max-h-screen min-h-screen flex flex-col">
-                <div className="flex items-center justify-between p-[0.7rem] bg-red-600 text-white border-b border-red-700">
+            {/* Chat Area */}
+            <div className="flex-1 min-h-screen max-h-screen flex flex-col">
+                <div className="flex items-center justify-between p-[10px] bg-red-600 text-white border-b">
                     <div className="flex items-center">
+                        <img
+                            src={selectedUser ? selectedUser.profilePhoto : profilePhoto}
+                            alt="User"
+                            className="w-10 h-10 object-contain bg-white rounded-full mr-3"
+                        />
                         <div>
-                            <img
-                                src={selectedUser ? selectedUser.profilePhoto : profilePhoto}
-                                alt="User"
-                                className="w-10 h-10 rounded-full object-contain bg-white mr-3"
-                            />
-                        </div>
-                        <div>
-                            <p className="font-medium">{selectedUser ? selectedUser.name : "Me"}</p>
-                            <p className="text-sm text-gray-200">{selectedUser ? "Active" : "Select a user"}</p>
+                            <p className="font-medium">{selectedUser ? selectedUser.name : 'Me'}</p>
+                            <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
                         </div>
                     </div>
                     <div className="flex space-x-7 text-gray-200 mr-2">
@@ -230,16 +217,11 @@ const Chat = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white text-black ">
+                <div className="flex-1 p-4 overflow-y-auto bg-white">
                     {messages.map((msg, index) => (
-                        <div
-                            key={index}
-                            className={`flex  mb-4 ${msg.isSender ? "justify-end" : "justify-start"}`}
-                        >
+                        <div key={index} className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}>
                             <div
-                                className={`p-2 rounded-lg max-w-xs ${msg.isSender
-                                    ? "bg-red-200 text-black"
-                                    : "bg-gray-300 text-black"
+                                className={`p-2 rounded-lg max-w-xs ${msg.isSender ? 'bg-red-200' : 'bg-gray-300'
                                     }`}
                             >
                                 {msg.text}
@@ -249,29 +231,25 @@ const Chat = () => {
                     <div ref={endRef}></div>
                 </div>
 
-
                 <form
-                    className="p-4 bg-red-600 space-x-3 flex items-center border-t border-gray-300 relative"
+                    className="p-4 bg-red-600 flex items-center space-x-3"
                     onSubmit={(e) => {
                         e.preventDefault();
                         handleSendMessage();
                     }}
                 >
-                    <label
-                        htmlFor="file"
-                        className="ml-3 text-gray-200 hover:text-white cursor-pointer"
-                    >
-                        <i className="fa-solid fa-image text-2xl"></i>
+                    <label htmlFor="file" className="text-gray-200 cursor-pointer">
+                        <i className="fas fa-image text-2xl"></i>
                     </label>
                     <input type="file" id="file" className="hidden" />
 
-                    <div className="ml-3 text-gray-200 hover:text-white cursor-pointer relative">
+                    <div className="relative text-gray-200 cursor-pointer">
                         <i
-                            className="fa-solid fa-face-smile text-2xl"
+                            className="fas fa-face-smile text-2xl"
                             onClick={() => setShowEmojiPicker((prev) => !prev)}
                         ></i>
                         {showEmojiPicker && (
-                            <div className="absolute bottom-[3.5rem] left-0 z-50">
+                            <div className="absolute bottom-12 left-0 z-50">
                                 <EmojiPicker onEmojiClick={onEmojiClick} />
                             </div>
                         )}
@@ -282,17 +260,13 @@ const Chat = () => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type a message"
-                        className="p-2 w-[45rem] bg-white text-black rounded-lg outline-none border border-gray-300"
+                        className="p-2 w-full bg-white rounded-lg outline-none border border-gray-300"
                     />
 
-                    <button
-                        type="submit" // Make the button a submit button
-                        className="ml-3 text-gray-200 hover:text-white"
-                    >
+                    <button type="submit" className="text-gray-200">
                         <i className="fas fa-paper-plane text-2xl"></i>
                     </button>
                 </form>
-
             </div>
         </div>
     );

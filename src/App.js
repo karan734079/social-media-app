@@ -96,7 +96,7 @@ const appRouter = createBrowserRouter([
     ),
   },
   {
-    path: "/chat",
+    path: "/chat/:id",
     element: (
       <ProtectedRoute>
         <ProtectedLayout>
