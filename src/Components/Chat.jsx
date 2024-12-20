@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import EmojiPicker from 'emoji-picker-react';
 import profilePhoto from '../images/Screenshot 2024-05-08 221135.png';
 import axios from 'axios';
 import {
-    // setMessages,
+    setMessages,
     addMessage,
     setSelectedUsers,
     toggleAddUserModal,
@@ -13,6 +14,9 @@ import {
     setIsNotFound,
     setSelectedUser,
 } from '../utils/chatSlice';
+import { supabase } from '../utils/supaBase';
+import { useParams } from 'react-router-dom';
+
 
 const Chat = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -31,20 +35,69 @@ const Chat = () => {
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const endRef = useRef(null);
 
+    const {id} = useParams();
+
+    const currentUserId = id;
+
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (endRef.current) {
+            endRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
     }, [messages]);
 
     const onEmojiClick = (emojiObject) => {
         setMessage((prev) => prev + emojiObject.emoji);
     };
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (message.trim()) {
-            dispatch(addMessage({ text: message, isSender: true }));
-            setMessage('');
+            const newMessage = { text: message, isSender: true, sender_id: currentUserId ,receiver_id : selectedUser?._id};
+
+            try {
+                const {error} = await supabase
+                    .from('messages')
+                    .insert([{ text: newMessage.text, is_sender: newMessage.isSender, sender_id: newMessage.sender_id , receiver_id : newMessage.receiver_id }]);
+                if (error) {
+                    console.error('Supabase error:', error.message);
+                    return;
+                }
+
+                // Add message to Redux store
+                dispatch(addMessage(newMessage));
+                setMessage('');
+            } catch (err) {
+                console.error('Error sending message:', err.message);
+            }
         }
     };
+
+    const fetchMessages = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('user_id', currentUserId)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching messages:', error.message);
+                return;
+            }
+
+            dispatch(setMessages(data.map((msg) => ({
+                text: msg.text,
+                isSender: msg.is_sender,
+                sender_id: msg.sender_id,
+                receiver_id:msg.receiver_id,
+            }))));
+        } catch (err) {
+            console.error('Error fetching messages:', err.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchMessages();
+    }, []);
 
     const closeModal = () => {
         dispatch(toggleAddUserModal());
@@ -52,14 +105,14 @@ const Chat = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setDebouncedQuery(query);
+            setDebouncedQuery(query.trim());
         }, 200);
 
         return () => clearTimeout(timer);
     }, [query]);
 
     useEffect(() => {
-        if (!debouncedQuery.trim()) {
+        if (!debouncedQuery) {
             dispatch(setSearchResults([]));
             dispatch(setIsNotFound(false));
             return;
@@ -93,12 +146,14 @@ const Chat = () => {
 
     const viewUserProfile = (userId) => {
         const user = searchResults.find((user) => user._id === userId);
-        dispatch(setSelectedUser(user));
+        if (user) {
+            dispatch(setSelectedUser(user));
+        }
     };
 
     const handleAddUser = () => {
         if (selectedUser && !selectedUsers.some((user) => user._id === selectedUser._id)) {
-            dispatch(setSelectedUsers([...selectedUsers, selectedUser]));
+            dispatch(setSelectedUsers([...selectedUsers, selectedUser]));   
             dispatch(setSelectedUser(null));
         }
         dispatch(toggleAddUserModal());
@@ -148,7 +203,7 @@ const Chat = () => {
                                                 onClick={() => viewUserProfile(user._id)}
                                             >
                                                 <img
-                                                    src={user.profilePhoto}
+                                                    src={user.profilePhoto || profilePhoto}
                                                     alt={`${user.username}'s profile`}
                                                     className="w-10 h-10 object-contain rounded-full mr-4"
                                                 />
@@ -183,13 +238,15 @@ const Chat = () => {
                             onClick={() => dispatch(setSelectedUser(user))}
                         >
                             <img
-                                src={user.profilePhoto}
-                                alt=""
+                                src={user.profilePhoto || profilePhoto}
+                                alt="Profile"
                                 className="w-10 h-10 object-contain rounded-full mr-3"
                             />
                             <div>
                                 <p className="font-medium">{user.name}</p>
-                                <p className="text-sm text-gray-500">{messages[messages.length - 1]?.text}</p>
+                                <p className="text-sm text-gray-500">
+                                    {messages[messages.length - 1]?.text || ''}
+                                </p>
                             </div>
                         </div>
                     ))}
@@ -198,15 +255,15 @@ const Chat = () => {
 
             {/* Chat Area */}
             <div className="flex-1 min-h-screen max-h-screen flex flex-col">
-                <div className="flex items-center justify-between p-[10px] bg-red-600 text-white border-b">
+                <div className="flex items-center justify-between p-3 bg-red-600 text-white border-b">
                     <div className="flex items-center">
                         <img
-                            src={selectedUser ? selectedUser.profilePhoto : profilePhoto}
+                            src={selectedUser?.profilePhoto || profilePhoto}
                             alt="User"
                             className="w-10 h-10 object-contain bg-white rounded-full mr-3"
                         />
                         <div>
-                            <p className="font-medium">{selectedUser ? selectedUser.name : 'Me'}</p>
+                            <p className="font-medium">{selectedUser?.name || 'Me'}</p>
                             <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
                         </div>
                     </div>
@@ -217,13 +274,10 @@ const Chat = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto bg-white">
+                <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}>
-                            <div
-                                className={`p-2 rounded-lg max-w-xs ${msg.isSender ? 'bg-red-200' : 'bg-gray-300'
-                                    }`}
-                            >
+                            <div className={`p-2 rounded-lg max-w-xs ${msg.isSender ? 'bg-red-200' : 'bg-gray-300'}`}>
                                 {msg.text}
                             </div>
                         </div>
