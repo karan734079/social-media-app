@@ -17,10 +17,16 @@ import {
 import { supabase } from '../utils/supaBase';
 import { useParams } from 'react-router-dom';
 
-
 const Chat = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [message, setMessage] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const endRef = useRef(null);
+
     const dispatch = useDispatch();
+    const { id } = useParams();
+    const currentUserId = id;
+
     const {
         messages,
         addUserModal,
@@ -31,14 +37,7 @@ const Chat = () => {
         selectedUser,
     } = useSelector((state) => state.chat);
 
-    const [message, setMessage] = useState('');
-    const [debouncedQuery, setDebouncedQuery] = useState('');
-    const endRef = useRef(null);
-
-    const {id} = useParams();
-
-    const currentUserId = id;
-
+    // Scroll to the bottom when messages change
     useEffect(() => {
         if (endRef.current) {
             endRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -51,19 +50,31 @@ const Chat = () => {
 
     const handleSendMessage = async () => {
         if (message.trim()) {
-            const newMessage = { text: message, isSender: true, sender_id: currentUserId ,receiver_id : selectedUser?._id};
+            const newMessage = {
+                text: message,
+                isSender: true, // Sender will always be the current user in this context
+                sender_id: currentUserId,
+                receiver_id: selectedUser?._id,
+            };
 
             try {
-                const {error} = await supabase
+                const { error } = await supabase
                     .from('messages')
-                    .insert([{ text: newMessage.text, is_sender: newMessage.isSender, sender_id: newMessage.sender_id , receiver_id : newMessage.receiver_id }]);
+                    .insert([
+                        {
+                            text: newMessage.text,
+                            is_sender: newMessage.isSender,
+                            sender_id: newMessage.sender_id,
+                            receiver_id: newMessage.receiver_id,
+                        },
+                    ]);
+
                 if (error) {
                     console.error('Supabase error:', error.message);
                     return;
                 }
 
-                // Add message to Redux store
-                dispatch(addMessage(newMessage));
+                // Clear the message input after sending
                 setMessage('');
             } catch (err) {
                 console.error('Error sending message:', err.message);
@@ -71,38 +82,71 @@ const Chat = () => {
         }
     };
 
-    const fetchMessages = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('user_id', currentUserId)
-                .order('created_at', { ascending: true });
 
-            if (error) {
-                console.error('Error fetching messages:', error.message);
-                return;
-            }
-
-            dispatch(setMessages(data.map((msg) => ({
-                text: msg.text,
-                isSender: msg.is_sender,
-                sender_id: msg.sender_id,
-                receiver_id:msg.receiver_id,
-            }))));
-        } catch (err) {
-            console.error('Error fetching messages:', err.message);
-        }
-    };
-
+    // Real-time message listener
     useEffect(() => {
+        const channel = supabase
+            .channel('messages')
+            .on('postgres_changes', { event: 'INSERT', table: 'messages' }, (payload) => {
+                if (
+                    payload.new.receiver_id === currentUserId ||
+                    payload.new.sender_id === currentUserId
+                ) {
+                    const incomingMessage = {
+                        text: payload.new.text,
+                        isSender: payload.new.sender_id === currentUserId,
+                        sender_id: payload.new.sender_id,
+                        receiver_id: payload.new.receiver_id,
+                    };
+
+                    dispatch(addMessage(incomingMessage));
+                }
+            })
+            .subscribe();
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [dispatch, currentUserId]);
+
+    // Fetch messages for the selected user
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!selectedUser) return;
+
+            try {
+                const { data, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .or(
+                        `sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`
+                    )
+                    .order('created_at', { ascending: true });
+
+                if (error) {
+                    console.error('Error fetching messages:', error.message);
+                    return;
+                }
+
+                dispatch(
+                    setMessages(
+                        data.map((msg) => ({
+                            text: msg.text,
+                            isSender: msg.sender_id === currentUserId,
+                            sender_id: msg.sender_id,
+                            receiver_id: msg.receiver_id,
+                        }))
+                    )
+                );
+            } catch (err) {
+                console.error('Error fetching messages:', err.message);
+            }
+        };
+
         fetchMessages();
-    }, []);
+    }, [selectedUser, dispatch, currentUserId]);
 
-    const closeModal = () => {
-        dispatch(toggleAddUserModal());
-    };
-
+    // Debounce search query updates
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query.trim());
@@ -111,6 +155,7 @@ const Chat = () => {
         return () => clearTimeout(timer);
     }, [query]);
 
+    // Perform user search
     useEffect(() => {
         if (!debouncedQuery) {
             dispatch(setSearchResults([]));
@@ -123,7 +168,9 @@ const Chat = () => {
                 const response = await axios.get(
                     `${process.env.REACT_APP_BASE_URL}api/auth/users/search?query=${debouncedQuery}`,
                     {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        },
                     }
                 );
 
@@ -144,6 +191,10 @@ const Chat = () => {
         handleSearch();
     }, [debouncedQuery, dispatch]);
 
+    const closeModal = () => {
+        dispatch(toggleAddUserModal());
+    };
+
     const viewUserProfile = (userId) => {
         const user = searchResults.find((user) => user._id === userId);
         if (user) {
@@ -152,8 +203,11 @@ const Chat = () => {
     };
 
     const handleAddUser = () => {
-        if (selectedUser && !selectedUsers.some((user) => user._id === selectedUser._id)) {
-            dispatch(setSelectedUsers([...selectedUsers, selectedUser]));   
+        if (
+            selectedUser &&
+            !selectedUsers.some((user) => user._id === selectedUser._id)
+        ) {
+            dispatch(setSelectedUsers([...selectedUsers, selectedUser]));
             dispatch(setSelectedUser(null));
         }
         dispatch(toggleAddUserModal());
@@ -162,7 +216,7 @@ const Chat = () => {
     return (
         <div className="h-full w-full flex items-start">
             {/* Left Sidebar */}
-            <div className="min-h-screen bg-white w-1/3 border-r">
+            <div className="min-h-screen bg-white w-1/4 border-r ">
                 <div className="flex items-center justify-between p-4 text-red-600 font-bold border-b">
                     <span className="text-2xl">Chats</span>
                     <button
@@ -230,7 +284,7 @@ const Chat = () => {
                     </div>
                 )}
 
-                <div className="overflow-y-auto h-[calc(100%-4rem)]">
+                <div className="overflow-y-auto scroll-bar h-[calc(100%-4rem)]">
                     {selectedUsers.map((user) => (
                         <div
                             key={user._id}
@@ -244,9 +298,6 @@ const Chat = () => {
                             />
                             <div>
                                 <p className="font-medium">{user.name}</p>
-                                <p className="text-sm text-gray-500">
-                                    {messages[messages.length - 1]?.text || ''}
-                                </p>
                             </div>
                         </div>
                     ))}
@@ -255,7 +306,7 @@ const Chat = () => {
 
             {/* Chat Area */}
             <div className="flex-1 min-h-screen max-h-screen flex flex-col">
-                <div className="flex items-center justify-between p-3 bg-red-600 text-white border-b">
+                <div className="flex items-center justify-between p-[10px] bg-red-600 text-white border-b">
                     <div className="flex items-center">
                         <img
                             src={selectedUser?.profilePhoto || profilePhoto}
@@ -275,15 +326,30 @@ const Chat = () => {
                 </div>
 
                 <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white">
-                    {messages.map((msg, index) => (
-                        <div key={index} className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`p-2 rounded-lg max-w-xs ${msg.isSender ? 'bg-red-200' : 'bg-gray-300'}`}>
-                                {msg.text}
+                    {messages
+                        .filter(
+                            (msg) =>
+                                (msg.sender_id === currentUserId && msg.receiver_id === selectedUser?._id) ||
+                                (msg.receiver_id === currentUserId && msg.sender_id === selectedUser?._id)
+                        )
+                        .map((msg, index) => (
+                            <div
+                                key={index}
+                                className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
+                            >
+                                <div
+                                    className={`p-2 rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
+                                        }`}
+                                >
+                                    {msg.text}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+
+
+                        ))}
                     <div ref={endRef}></div>
                 </div>
+
 
                 <form
                     className="p-4 bg-red-600 flex items-center space-x-3"
