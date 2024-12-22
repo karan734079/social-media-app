@@ -62,7 +62,7 @@ const Chat = () => {
         if (storedMessages) {
             dispatch(setMessages(storedMessages));
         }
-    }, [dispatch, selectedUser]);
+    }, [dispatch, selectedUser]);   
 
     // Scroll to the bottom when messages change
     useEffect(() => {
