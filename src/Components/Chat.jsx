@@ -37,6 +37,33 @@ const Chat = () => {
         selectedUser,
     } = useSelector((state) => state.chat);
 
+    useEffect(() => {
+        localStorage.setItem('selectedUsers', JSON.stringify(selectedUsers));
+    }, [selectedUsers]);
+
+    useEffect(() => {
+        if (selectedUser) {
+            localStorage.setItem(
+                `messages_${selectedUser._id}`,
+                JSON.stringify(messages)
+            );
+        }
+    }, [messages, selectedUser]);
+
+    useEffect(() => {
+        const storedUsers = JSON.parse(localStorage.getItem('selectedUsers'));
+        if (storedUsers) {
+            dispatch(setSelectedUsers(storedUsers));
+        }
+
+        const storedMessages =
+            selectedUser &&
+            JSON.parse(localStorage.getItem(`messages_${selectedUser._id}`));
+        if (storedMessages) {
+            dispatch(setMessages(storedMessages));
+        }
+    }, [dispatch, selectedUser]);
+
     // Scroll to the bottom when messages change
     useEffect(() => {
         if (endRef.current) {
@@ -52,7 +79,7 @@ const Chat = () => {
         if (message.trim()) {
             const newMessage = {
                 text: message,
-                isSender: true, // Sender will always be the current user in this context
+                isSender: true,
                 sender_id: currentUserId,
                 receiver_id: selectedUser?._id,
             };
@@ -74,7 +101,6 @@ const Chat = () => {
                     return;
                 }
 
-                // Clear the message input after sending
                 setMessage('');
             } catch (err) {
                 console.error('Error sending message:', err.message);
@@ -83,7 +109,6 @@ const Chat = () => {
     };
 
 
-    // Real-time message listener
     useEffect(() => {
         const channel = supabase
             .channel('messages')
@@ -146,7 +171,6 @@ const Chat = () => {
         fetchMessages();
     }, [selectedUser, dispatch, currentUserId]);
 
-    // Debounce search query updates
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query.trim());
@@ -155,7 +179,6 @@ const Chat = () => {
         return () => clearTimeout(timer);
     }, [query]);
 
-    // Perform user search
     useEffect(() => {
         if (!debouncedQuery) {
             dispatch(setSearchResults([]));
@@ -208,7 +231,6 @@ const Chat = () => {
             !selectedUsers.some((user) => user._id === selectedUser._id)
         ) {
             dispatch(setSelectedUsers([...selectedUsers, selectedUser]));
-            dispatch(setSelectedUser(null));
         }
         dispatch(toggleAddUserModal());
     };
