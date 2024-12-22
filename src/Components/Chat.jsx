@@ -67,7 +67,7 @@ const Chat = () => {
     // Scroll to the bottom when messages change
     useEffect(() => {
         if (endRef.current) {
-            endRef.current.scrollIntoView({ behavior: 'smooth' });
+            endRef.current.scrollIntoView({ behavior: 'smooth' }); 
         }
     }, [messages]);
 
@@ -134,7 +134,7 @@ const Chat = () => {
         };
     }, [dispatch, currentUserId]);
 
-    // Fetch messages for the selected user
+    
     useEffect(() => {
         const fetchMessages = async () => {
             if (!selectedUser) return;
