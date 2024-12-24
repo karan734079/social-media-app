@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import EmojiPicker from 'emoji-picker-react';
 import profilePhoto from '../images/Screenshot 2024-05-08 221135.png';
 import axios from 'axios';
+import {v4 as uuidv4} from 'uuid';
 import {
     setMessages,
     addMessage,
@@ -22,6 +23,10 @@ const Chat = () => {
     const [message, setMessage] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const endRef = useRef(null);
+    const [following, setFollowing] = useState([]);
+    const [showFollowing, setShowFollowing] = useState(false);
+    const [wantToDelete, setWantToDelete] = useState(false);
+
 
     const dispatch = useDispatch();
     const { id } = useParams();
@@ -38,36 +43,33 @@ const Chat = () => {
     } = useSelector((state) => state.chat);
 
     useEffect(() => {
-        localStorage.setItem('selectedUsers', JSON.stringify(selectedUsers));
-    }, [selectedUsers]);
+        fetchFollowing();
+    }, []);
+
+    const fetchFollowing = async () => {
+        if (showFollowing) {
+            setShowFollowing(false);
+        } else {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            setFollowing(response.data);
+            setShowFollowing(true);
+        }
+    };
 
     useEffect(() => {
-        if (selectedUser) {
-            localStorage.setItem(
-                `messages_${selectedUser._id}`,
-                JSON.stringify(messages)
-            );
+        if (selectedUsers.length > 0) {
+            dispatch(setSelectedUser(selectedUsers[0]));
+        } else if (following.length > 0) {
+            dispatch(setSelectedUser(following[0]));
         }
-    }, [messages, selectedUser]);
+    }, [dispatch, selectedUsers, following]);
 
-    useEffect(() => {
-        const storedUsers = JSON.parse(localStorage.getItem('selectedUsers'));
-        if (storedUsers) {
-            dispatch(setSelectedUsers(storedUsers));
-        }
 
-        const storedMessages =
-            selectedUser &&
-            JSON.parse(localStorage.getItem(`messages_${selectedUser._id}`));
-        if (storedMessages) {
-            dispatch(setMessages(storedMessages));
-        }
-    }, [dispatch, selectedUser]);   
-
-    // Scroll to the bottom when messages change
     useEffect(() => {
         if (endRef.current) {
-            endRef.current.scrollIntoView({ behavior: 'smooth' }); 
+            endRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
 
@@ -78,6 +80,7 @@ const Chat = () => {
     const handleSendMessage = async () => {
         if (message.trim()) {
             const newMessage = {
+                id:uuidv4(),
                 text: message,
                 isSender: true,
                 sender_id: currentUserId,
@@ -89,6 +92,7 @@ const Chat = () => {
                     .from('messages')
                     .insert([
                         {
+                            id:newMessage.id,
                             text: newMessage.text,
                             is_sender: newMessage.isSender,
                             sender_id: newMessage.sender_id,
@@ -109,6 +113,7 @@ const Chat = () => {
     };
 
 
+
     useEffect(() => {
         const channel = supabase
             .channel('messages')
@@ -118,11 +123,12 @@ const Chat = () => {
                     payload.new.sender_id === currentUserId
                 ) {
                     const incomingMessage = {
+                        id: payload.new.id,
                         text: payload.new.text,
                         isSender: payload.new.sender_id === currentUserId,
                         sender_id: payload.new.sender_id,
                         receiver_id: payload.new.receiver_id,
-                    };
+                    };  
 
                     dispatch(addMessage(incomingMessage));
                 }
@@ -134,7 +140,7 @@ const Chat = () => {
         };
     }, [dispatch, currentUserId]);
 
-    
+
     useEffect(() => {
         const fetchMessages = async () => {
             if (!selectedUser) return;
@@ -156,6 +162,7 @@ const Chat = () => {
                 dispatch(
                     setMessages(
                         data.map((msg) => ({
+                            id: msg.id,
                             text: msg.text,
                             isSender: msg.sender_id === currentUserId,
                             sender_id: msg.sender_id,
@@ -235,6 +242,20 @@ const Chat = () => {
         dispatch(toggleAddUserModal());
     };
 
+    const handleDeleteMessage = async (messageId) => {
+
+        try {
+             await supabase
+                .from('messages')
+                .delete()
+                .eq('id', messageId);
+
+            dispatch(setMessages(messages.filter((msg) => msg.id !== messageId)));
+        } catch (err) {
+            console.error('Error deleting message:', err.message);
+        }
+    };
+
     return (
         <div className="h-full w-full flex items-start">
             {/* Left Sidebar */}
@@ -310,7 +331,7 @@ const Chat = () => {
                     {selectedUsers.map((user) => (
                         <div
                             key={user._id}
-                            className="cursor-pointer p-3 flex items-center border-b hover:bg-gray-200"
+                            className={`cursor-pointer p-3 flex items-center border-b ${selectedUser?._id === user._id ? 'bg-gray-200' : " "}`}
                             onClick={() => dispatch(setSelectedUser(user))}
                         >
                             <img
@@ -323,6 +344,24 @@ const Chat = () => {
                             </div>
                         </div>
                     ))}
+                    <div>
+                        {following.map((user) => (
+                            <div
+                                key={user._id}
+                                className={`cursor-pointer p-3 flex items-center border-b ${selectedUser?._id === user._id ? 'bg-gray-200' : " "}`}
+                                onClick={() => dispatch(setSelectedUser(user))}
+                            >
+                                <img
+                                    src={user.profilePhoto || profilePhoto}
+                                    alt="Profile"
+                                    className="w-10 h-10 object-contain rounded-full mr-3"
+                                />
+                                <div>
+                                    <p className="font-medium">{user.name}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -336,7 +375,7 @@ const Chat = () => {
                             className="w-10 h-10 object-contain bg-white rounded-full mr-3"
                         />
                         <div>
-                            <p className="font-medium">{selectedUser?.name || 'Me'}</p>
+                            <p className="font-medium">{selectedUser?.name || 'Select a user'}</p>
                             <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
                         </div>
                     </div>
@@ -358,16 +397,22 @@ const Chat = () => {
                             <div
                                 key={index}
                                 className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
+
+                                onClick={() => setWantToDelete(prev => !prev)}
                             >
                                 <div
-                                    className={`p-2 rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
+                                    className={`p-2 cursor-pointer rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
                                         }`}
                                 >
                                     {msg.text}
                                 </div>
+                                {wantToDelete && <button
+                                    className="text-red-600"
+                                    onClick={() => handleDeleteMessage(msg.id)}
+                                >
+                                    Delete
+                                </button>}
                             </div>
-
-
                         ))}
                     <div ref={endRef}></div>
                 </div>

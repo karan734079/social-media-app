@@ -137,7 +137,8 @@ const Profile = () => {
                         </ul>
                     </div>
                 )}
-                <div className="mt-8 w-full max-w-4xl">                    <Posts />
+                <div className="mt-8 w-full max-w-4xl">
+                    <Posts />
                 </div>
             </div>
 
@@ -166,8 +167,7 @@ const Profile = () => {
                         </div>
                     </div>
                 </div>
-            )}
-
+            )}      
         </div>
     );
 };
