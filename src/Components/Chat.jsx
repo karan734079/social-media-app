@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import EmojiPicker from 'emoji-picker-react';
 import profilePhoto from '../images/Screenshot 2024-05-08 221135.png';
 import axios from 'axios';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
     setMessages,
     addMessage,
@@ -22,11 +22,10 @@ const Chat = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [message, setMessage] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
-    const endRef = useRef(null);
     const [following, setFollowing] = useState([]);
     const [showFollowing, setShowFollowing] = useState(false);
     const [wantToDelete, setWantToDelete] = useState(false);
-
+    const endRef = useRef(null);
 
     const dispatch = useDispatch();
     const { id } = useParams();
@@ -80,7 +79,7 @@ const Chat = () => {
     const handleSendMessage = async () => {
         if (message.trim()) {
             const newMessage = {
-                id:uuidv4(),
+                id: uuidv4(),
                 text: message,
                 isSender: true,
                 sender_id: currentUserId,
@@ -92,7 +91,7 @@ const Chat = () => {
                     .from('messages')
                     .insert([
                         {
-                            id:newMessage.id,
+                            id: newMessage.id,
                             text: newMessage.text,
                             is_sender: newMessage.isSender,
                             sender_id: newMessage.sender_id,
@@ -128,7 +127,7 @@ const Chat = () => {
                         isSender: payload.new.sender_id === currentUserId,
                         sender_id: payload.new.sender_id,
                         receiver_id: payload.new.receiver_id,
-                    };  
+                    };
 
                     dispatch(addMessage(incomingMessage));
                 }
@@ -142,42 +141,42 @@ const Chat = () => {
 
 
     useEffect(() => {
-        const fetchMessages = async () => {
-            if (!selectedUser) return;
-
-            try {
-                const { data, error } = await supabase
-                    .from('messages')
-                    .select('*')
-                    .or(
-                        `sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`
-                    )
-                    .order('created_at', { ascending: true });
-
-                if (error) {
-                    console.error('Error fetching messages:', error.message);
-                    return;
-                }
-
-                dispatch(
-                    setMessages(
-                        data.map((msg) => ({
-                            id: msg.id,
-                            text: msg.text,
-                            isSender: msg.sender_id === currentUserId,
-                            sender_id: msg.sender_id,
-                            receiver_id: msg.receiver_id,
-                        }))
-                    )
-                );
-            } catch (err) {
-                console.error('Error fetching messages:', err.message);
-            }
-        };
-
         fetchMessages();
     }, [selectedUser, dispatch, currentUserId]);
 
+    const fetchMessages = async () => {
+        if (!selectedUser) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .or(
+                    `sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`
+                )
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching messages:', error.message);
+                return;
+            }
+
+            dispatch(
+                setMessages(
+                    data.map((msg) => ({
+                        id: msg.id,
+                        text: msg.text,
+                        isSender: msg.sender_id === currentUserId,
+                        sender_id: msg.sender_id,
+                        receiver_id: msg.receiver_id,
+                    }))
+                )
+            );
+        } catch (err) {
+            console.error('Error fetching messages:', err.message);
+        }
+    };
+    
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query.trim());
@@ -245,12 +244,13 @@ const Chat = () => {
     const handleDeleteMessage = async (messageId) => {
 
         try {
-             await supabase
+            await supabase
                 .from('messages')
                 .delete()
                 .eq('id', messageId);
 
             dispatch(setMessages(messages.filter((msg) => msg.id !== messageId)));
+            setWantToDelete(null)
         } catch (err) {
             console.error('Error deleting message:', err.message);
         }
@@ -396,28 +396,37 @@ const Chat = () => {
                         .map((msg, index) => (
                             <div
                                 key={index}
-                                className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
-
-                                onClick={() => setWantToDelete(prev => !prev)}
+                                className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'} relative`}
+                                onClick={() => setWantToDelete(msg.id)}
                             >
+                                {wantToDelete === msg.id && msg.sender_id === currentUserId && (
+                                    <div className="absolute -my-6 flex space-x-1 m-1">
+                                        <button
+                                            className="text-white text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded-md"
+                                            onClick={() => handleDeleteMessage(msg.id)}
+                                        >
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                        <button
+                                            className="bg-gray-200 text-xs hover:bg-gray-400 px-2 py-1 rounded-md"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setWantToDelete(false);
+                                            }}
+                                        >
+                                            <i className="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                )}
                                 <div
-                                    className={`p-2 cursor-pointer rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
-                                        }`}
+                                    className={`p-2 cursor-pointer rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'}`}
                                 >
                                     {msg.text}
                                 </div>
-                                {wantToDelete && <button
-                                    className="text-red-600"
-                                    onClick={() => handleDeleteMessage(msg.id)}
-                                >
-                                    Delete
-                                </button>}
                             </div>
                         ))}
                     <div ref={endRef}></div>
                 </div>
-
-
                 <form
                     className="p-4 bg-red-600 flex items-center space-x-3"
                     onSubmit={(e) => {
