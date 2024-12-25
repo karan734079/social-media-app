@@ -25,8 +25,11 @@ const Chat = () => {
     const [following, setFollowing] = useState([]);
     const [showFollowing, setShowFollowing] = useState(false);
     const [wantToDelete, setWantToDelete] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMoreMessages, setHasMoreMessages] = useState(true);
+    const [lastFetchMessage, setLastFetchMessage] = useState(null);
     const endRef = useRef(null);
-
+    const chatRef = useRef(null);
     const dispatch = useDispatch();
     const { id } = useParams();
     const currentUserId = id;
@@ -64,13 +67,6 @@ const Chat = () => {
             dispatch(setSelectedUser(following[0]));
         }
     }, [dispatch, selectedUsers, following]);
-
-
-    useEffect(() => {
-        if (endRef.current) {
-            endRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
 
     const onEmojiClick = (emojiObject) => {
         setMessage((prev) => prev + emojiObject.emoji);
@@ -111,8 +107,6 @@ const Chat = () => {
         }
     };
 
-
-
     useEffect(() => {
         const channel = supabase
             .channel('messages')
@@ -139,44 +133,78 @@ const Chat = () => {
         };
     }, [dispatch, currentUserId]);
 
-
     useEffect(() => {
-        fetchMessages();
+        if (selectedUser) {
+            fetchMessages();
+        }
     }, [selectedUser, dispatch, currentUserId]);
-
-    const fetchMessages = async () => {
-        if (!selectedUser) return;
-
+    
+    const fetchMessages = async (isPaginated = false) => {
+        if (!selectedUser || (!isPaginated && loadingMore)) return;
+    
+        setLoadingMore(true);
+    
         try {
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .or(
-                    `sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`
-                )
-                .order('created_at', { ascending: true });
-
+                .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
+                .order('created_at', { ascending: false })
+                .limit(20)
+                .lt('created_at', lastFetchMessage || new Date().toISOString());
+    
             if (error) {
                 console.error('Error fetching messages:', error.message);
+                setLoadingMore(false);
                 return;
             }
-
-            dispatch(
-                setMessages(
-                    data.map((msg) => ({
-                        id: msg.id,
-                        text: msg.text,
-                        isSender: msg.sender_id === currentUserId,
-                        sender_id: msg.sender_id,
-                        receiver_id: msg.receiver_id,
-                    }))
-                )
-            );
+    
+            if (data.length > 0) {
+                const updatedMessages = isPaginated
+                    ? [...data.reverse(), ...messages]
+                    : [...data.reverse()
+                        .map((msg) => ({
+                            ...msg,
+                            isSender: msg.sender_id === currentUserId,
+                        })),...messages];
+    
+                setLastFetchMessage(data[data.length - 1].created_at);
+                dispatch(setMessages(updatedMessages));
+            } else {
+                setHasMoreMessages(false);
+            }
         } catch (err) {
-            console.error('Error fetching messages:', err.message);
+            console.error('Error fetching messagez:', err.message);
+        } finally {
+            setLoadingMore(false);
         }
     };
     
+    useEffect(() => {
+        if (endRef.current && messages.length > 0) {
+            endRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+    
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (chatRef.current.scrollTop === 0 && hasMoreMessages && !loadingMore) {
+                const currentScrollHeight = chatRef.current.scrollHeight;
+                fetchMessages(true).then(() => {
+                    const newScrollHeight = chatRef.current.scrollHeight;
+                    chatRef.current.scrollTop = newScrollHeight - currentScrollHeight;
+                });
+            }
+        };
+
+        const chatDiv = chatRef.current;
+        if (chatDiv) {
+            chatDiv.addEventListener('scroll', handleScroll);
+            return () => chatDiv.removeEventListener('scroll', handleScroll);
+        }
+    }, [hasMoreMessages, loadingMore]);
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query.trim());
@@ -379,14 +407,17 @@ const Chat = () => {
                             <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
                         </div>
                     </div>
-                    <div className="flex space-x-7 text-gray-200 mr-2">
+                    <div className="flex space-x-7 text-gray-200 mr-2">+ 
                         <i className="fas fa-video cursor-pointer hover:text-white"></i>
                         <i className="fas fa-phone cursor-pointer hover:text-white"></i>
                         <i className="fas fa-search cursor-pointer hover:text-white"></i>
                     </div>
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white">
+                <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white" ref={chatRef}>
+                    {loadingMore && (
+                        <div className="text-center text-gray-600 my-4">Loading previous messages...</div>
+                    )}
                     {messages
                         .filter(
                             (msg) =>
@@ -396,35 +427,69 @@ const Chat = () => {
                         .map((msg, index) => (
                             <div
                                 key={index}
-                                className={`flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'} relative`}
-                                onClick={() => setWantToDelete(msg.id)}
+                                className={`relative group flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
                             >
+                                {/* Dropdown Trigger */}
+                                <div className={`absolute   hidden -my-4 mx-1 group-hover:block`}>
+                                    <button
+                                        className="text-gray-500 hover:text-gray-800"
+                                        onClick={(e) => {
+                                            setWantToDelete(msg.id);
+                                        }}
+                                    >
+                                        {msg.isSender === true && <i className="fas fa-ellipsis-h"></i>}
+                                    </button>
+                                </div>
+
+                                {/* Dropdown Menu */}
                                 {wantToDelete === msg.id && msg.sender_id === currentUserId && (
-                                    <div className="absolute -my-6 flex space-x-1 m-1">
-                                        <button
-                                            className="text-white text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded-md"
-                                            onClick={() => handleDeleteMessage(msg.id)}
-                                        >
-                                            <i className="fa-solid fa-trash"></i>
-                                        </button>
-                                        <button
-                                            className="bg-gray-200 text-xs hover:bg-gray-400 px-2 py-1 rounded-md"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setWantToDelete(false);
-                                            }}
-                                        >
-                                            <i className="fa-solid fa-xmark"></i>
-                                        </button>
+                                    <div className="absolute top-0 right-0 mt-6 bg-white border border-gray-300 shadow-lg rounded-md z-10">
+                                        <ul className="text-sm">
+                                            <li
+                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-red-600"
+                                                // onClick={() => {
+                                                //     setEditingMessageId(msg.id);
+                                                //     setEditingMessageText(msg.text);
+                                                //     setWantToDelete(false);
+                                                // }}
+                                            >
+                                                Update
+                                            </li>  
+                                            <li
+                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-red-600"
+                                                onClick={() => {
+                                                    handleDeleteMessage(msg.id);
+                                                }}
+                                            >
+                                                Delete
+                                            </li>
+                                            <li
+                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setWantToDelete(false);
+                                                }}
+                                            >
+                                                Cancel
+                                            </li>
+                                        </ul>
                                     </div>
                                 )}
+
+                                {/* Message Bubble */}
                                 <div
-                                    className={`p-2 cursor-pointer rounded-lg max-w-xs whitespace-pre-wrap ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'}`}
+                                    className={`p-2 rounded-lg inline-block cursor-pointer ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
+                                        }`}
+                                    style={{
+                                        maxWidth: '75%',
+                                        width: 'fit-content',
+                                    }}
                                 >
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
+
                     <div ref={endRef}></div>
                 </div>
                 <form
