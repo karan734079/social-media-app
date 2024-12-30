@@ -28,6 +28,11 @@ const Chat = () => {
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
     const [lastFetchMessage, setLastFetchMessage] = useState(null);
+    const [editingMessageId, setEditingMessageId] = useState(null);
+    const [editingMessageText, setEditingMessageText] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+
     const endRef = useRef(null);
     const chatRef = useRef(null);
     const dispatch = useDispatch();
@@ -80,6 +85,7 @@ const Chat = () => {
                 isSender: true,
                 sender_id: currentUserId,
                 receiver_id: selectedUser?._id,
+                image_url:"",
             };
 
             try {
@@ -92,6 +98,7 @@ const Chat = () => {
                             is_sender: newMessage.isSender,
                             sender_id: newMessage.sender_id,
                             receiver_id: newMessage.receiver_id,
+                            image_url:newMessage.image_url,
                         },
                     ]);
 
@@ -121,6 +128,7 @@ const Chat = () => {
                         isSender: payload.new.sender_id === currentUserId,
                         sender_id: payload.new.sender_id,
                         receiver_id: payload.new.receiver_id,
+                        image_url:payload.new.image_url,
                     };
 
                     dispatch(addMessage(incomingMessage));
@@ -129,7 +137,7 @@ const Chat = () => {
             .subscribe();
 
         return () => {
-            channel.unsubscribe();
+            channel.unsubscribe(); 
         };
     }, [dispatch, currentUserId]);
 
@@ -138,7 +146,7 @@ const Chat = () => {
             fetchMessages();
         }
     }, [selectedUser, dispatch, currentUserId]);
-    
+
     const fetchMessages = async (isPaginated = false) => {
         if (!selectedUser || (!isPaginated && loadingMore)) return;
     
@@ -147,7 +155,7 @@ const Chat = () => {
         try {
             const { data, error } = await supabase
                 .from('messages')
-                .select('*')
+                .select('*')  // This will fetch all columns including image_url
                 .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
                 .order('created_at', { ascending: false })
                 .limit(20)
@@ -155,7 +163,6 @@ const Chat = () => {
     
             if (error) {
                 console.error('Error fetching messages:', error.message);
-                setLoadingMore(false);
                 return;
             }
     
@@ -166,15 +173,15 @@ const Chat = () => {
                         .map((msg) => ({
                             ...msg,
                             isSender: msg.sender_id === currentUserId,
-                        })),...messages];
+                        })), ...messages];
     
-                setLastFetchMessage(data[data.length - 1].created_at);
+                setLastFetchMessage(data[data.length - 1]?.created_at || null);
                 dispatch(setMessages(updatedMessages));
             } else {
                 setHasMoreMessages(false);
             }
         } catch (err) {
-            console.error('Error fetching messagez:', err.message);
+            console.error('Error fetching messages:', err.message);
         } finally {
             setLoadingMore(false);
         }
@@ -185,7 +192,7 @@ const Chat = () => {
             endRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages]);
-    
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -269,20 +276,138 @@ const Chat = () => {
         dispatch(toggleAddUserModal());
     };
 
-    const handleDeleteMessage = async (messageId) => {
-
+    const handleDeleteMessage = async (messageId, imageUrl) => {
         try {
-            await supabase
+            const { error: deleteError } = await supabase
                 .from('messages')
                 .delete()
                 .eq('id', messageId);
-
+            
+            if (deleteError) {
+                console.error('Error deleting message:', deleteError.message);
+                return;
+            }
+    
+            if (imageUrl) {
+                const fileName = imageUrl.split('/').pop();
+    
+                const { error: storageError } = await supabase.storage
+                    .from('images') 
+                    .remove([fileName]);
+    
+                if (storageError) {
+                    console.error('Error deleting image from storage:', storageError.message);
+                    return;
+                }
+                
+                console.log('Image deleted from storage successfully');
+            }
+    
             dispatch(setMessages(messages.filter((msg) => msg.id !== messageId)));
-            setWantToDelete(null)
+    
         } catch (err) {
-            console.error('Error deleting message:', err.message);
+            console.error('Error deleting message or image:', err.message);
         }
     };
+    
+    
+    const handleDeleteButtonClick = (messageId, imageUrl) => {
+        setWantToDelete(true);
+        handleDeleteMessage(messageId, imageUrl);
+    };
+    
+
+    const handleUpdateMessage = async () => {
+        if (!editingMessageText.trim()) return;
+
+        try {
+            const { error } = await supabase.from('messages').update({ text: editingMessageText }).eq('id', editingMessageId);
+
+            if (error) {
+                console.error("error updating message", error.message);
+            }
+
+            const updatedMessages = messages.map((msg) => msg.id === editingMessageId ? { ...msg, text: editingMessageText } : msg);
+            dispatch(setMessages(updatedMessages));
+
+            setEditingMessageId(null);
+            setEditingMessageText("");
+        } catch (err) {
+            console.error("error updating message", err.message);
+        }
+    }
+
+    useEffect(() => {
+        return () => {
+            if (imagePreview) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
+
+    const handleFileChange = (file) => {
+        if (!file) return;
+
+        const previewUrl = URL.createObjectURL(file);
+        setSelectedImage(file);
+        setImagePreview(previewUrl);
+    };
+
+
+    const handleSendImage = async () => {
+        if (!selectedImage) return;
+        
+        try {
+            const fileName = `${uuidv4()}-${selectedImage.name}`;
+            console.log('Uploading file:', fileName);
+            
+            const { data, error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(fileName, selectedImage);
+            
+            if (uploadError) {
+                console.error('Error uploading file:', uploadError.message);
+                return;
+            }
+    
+            console.log('Upload successful:', data);
+    
+            const { data: publicData, error: urlError } = supabase.storage
+                .from('images')
+                .getPublicUrl(fileName);
+            
+            if (urlError) {
+                console.error('Error getting public URL:', urlError.message);
+                return;
+            }
+            
+            console.log('Public URL:', publicData.publicUrl);
+    
+            const newMessage = {
+                id: uuidv4(),
+                text: '',
+                is_sender: true,
+                sender_id: currentUserId,
+                receiver_id: selectedUser?._id,
+                image_url: publicData.publicUrl,
+            };
+    
+            const { error: insertError } = await supabase
+                .from('messages')
+                .insert([newMessage]);
+            
+            if (insertError) {
+                console.error('Error saving message:', insertError.message);
+                return;
+            }
+            setSelectedImage(null);
+            setImagePreview(null);
+            console.log('Image sent successfully!');
+        } catch (err) {
+            console.error('Error sending image:', err.message);
+        }
+    };
+       
 
     return (
         <div className="h-full w-full flex items-start">
@@ -407,7 +532,7 @@ const Chat = () => {
                             <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
                         </div>
                     </div>
-                    <div className="flex space-x-7 text-gray-200 mr-2">+ 
+                    <div className="flex space-x-7 text-gray-200 mr-2">
                         <i className="fas fa-video cursor-pointer hover:text-white"></i>
                         <i className="fas fa-phone cursor-pointer hover:text-white"></i>
                         <i className="fas fa-search cursor-pointer hover:text-white"></i>
@@ -443,22 +568,22 @@ const Chat = () => {
 
                                 {/* Dropdown Menu */}
                                 {wantToDelete === msg.id && msg.sender_id === currentUserId && (
-                                    <div className="absolute top-0 right-0 mt-6 bg-white border border-gray-300 shadow-lg rounded-md z-10">
+                                    <div className="absolute top-0 text-xl w-32 text-center right-0 mt-1 bg-white border border-gray-300 shadow-lg rounded-md z-10">
                                         <ul className="text-sm">
                                             <li
-                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-red-600"
-                                                // onClick={() => {
-                                                //     setEditingMessageId(msg.id);
-                                                //     setEditingMessageText(msg.text);
-                                                //     setWantToDelete(false);
-                                                // }}
+                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                                onClick={() => {
+                                                    setEditingMessageId(msg.id);
+                                                    setEditingMessageText(msg.text);
+                                                    setWantToDelete(false);
+                                                }}
                                             >
                                                 Update
-                                            </li>  
+                                            </li>
                                             <li
-                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer text-red-600"
+                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer hover:text-red-600"
                                                 onClick={() => {
-                                                    handleDeleteMessage(msg.id);
+                                                    handleDeleteButtonClick(msg.id , msg.image_url);
                                                 }}
                                             >
                                                 Delete
@@ -477,16 +602,49 @@ const Chat = () => {
                                 )}
 
                                 {/* Message Bubble */}
-                                <div
-                                    className={`p-2 rounded-lg inline-block cursor-pointer ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'
-                                        }`}
-                                    style={{
-                                        maxWidth: '75%',
-                                        width: 'fit-content',
-                                    }}
-                                >
-                                    {msg.text}
-                                </div>
+                                {editingMessageId === msg.id ? (
+                                    <div className="flex items-center">
+                                        <input
+                                            type="text"
+                                            value={editingMessageText}
+                                            onChange={(e) => setEditingMessageText(e.target.value)}
+                                            className="p-2 rounded-lg bg-red-200 outline-none border-gray-300 flex-1"
+                                            autoFocus
+                                        />
+                                        <button
+                                            onClick={handleUpdateMessage}
+                                            className="ml-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-800"
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setEditingMessageId(null);
+                                                setEditingMessageText('');
+                                            }}
+                                            className="ml-2 px-4 py-2 text-sm bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div
+                                        className={`p-2 rounded-lg inline-block cursor-pointer ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'}`}
+                                        style={{
+                                            maxWidth: '75%',
+                                            width: 'fit-content',
+                                        }}
+                                    >
+                                        {msg.text && <p>{msg.text}</p>}
+                                        {msg.image_url && (
+                                            <img
+                                                src={msg.image_url}
+                                                alt="message content"
+                                                className="mt-2 w-full max-w-xs rounded-lg"
+                                            />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ))}
 
@@ -502,7 +660,30 @@ const Chat = () => {
                     <label htmlFor="file" className="text-gray-200 cursor-pointer">
                         <i className="fas fa-image text-2xl"></i>
                     </label>
-                    <input type="file" id="file" className="hidden" />
+                    <input
+                        type="file"
+                        id="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e.target.files[0])}
+                    />
+
+                    {imagePreview && (
+                        <div className="flex flex-col items-center space-y-2">
+                            <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="w-24 absolute -my-24  h-24 object-contain bg-white rounded-md border"
+                            />
+                            <button
+                                type="button"
+                                className="px-4 py-2 text-white rounded-md"
+                                onClick={handleSendImage}
+                            >
+                                <i className="fas fa-paper-plane text-lg hover:text-gray-200"></i>
+                            </button>
+                        </div>
+                    )}
 
                     <div className="relative text-gray-200 cursor-pointer">
                         <i
@@ -528,6 +709,7 @@ const Chat = () => {
                         <i className="fas fa-paper-plane text-2xl"></i>
                     </button>
                 </form>
+
             </div>
         </div>
     );
