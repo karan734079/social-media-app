@@ -22,7 +22,9 @@ const chatSlice = createSlice({
       state.messages = action.payload;
     },
     addMessage: (state, action) => {
-      state.messages.push(action.payload);
+      if (!state.messages.some((msg) => msg.id === action.payload.id)) {
+        state.messages.push(action.payload);
+      }
     },
     setSelectedUsers: (state, action) => {
       state.selectedUsers = action.payload;
