@@ -45,8 +45,7 @@ const SignUp = () => {
         theme: 'light',
       });
     }
-  };
-
+  };  
 
   return (
     <div>

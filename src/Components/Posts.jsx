@@ -202,7 +202,7 @@ const Posts = () => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-6 p-4">
+    <div className="grid grid-cols-3 gap-4 p-6">
       {posts.map((post) => (
         <div
           key={post._id}
@@ -259,19 +259,23 @@ const Posts = () => {
               </div>
               <div className="mt-auto">
                 <button
-                  onClick={() => handleDelete(selectedPost._id)}
+                  onClick={() => {
+                    handleDelete(selectedPost._id); // Call the delete function
+                    closeModal(); // Close the modal
+                  }}
                   className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 w-full mb-4"
                 >
                   Delete Post
                 </button>
                 <button
-                  onClick={closeModal}
+                  onClick={closeModal} // Close modal when "Close" button is clicked
                   className="bg-gray-300 py-2 px-4 rounded hover:bg-gray-400 w-full"
                 >
                   Close
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}

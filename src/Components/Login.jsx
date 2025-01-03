@@ -53,7 +53,7 @@ const Login = () => {
       });
     }
   };
-
+  
   return (
     <div className="items-center text-center justify-center">
       <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
@@ -100,3 +100,4 @@ const Login = () => {
 };
 
 export default Login;
+
