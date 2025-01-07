@@ -20,7 +20,6 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setProfile(response.data);
-      console.log(response.data);
       setUserId(response.data._id);
     };
 

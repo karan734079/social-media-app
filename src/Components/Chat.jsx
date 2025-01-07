@@ -10,6 +10,8 @@ import ChatFooter from './ChatFooter';
 import ChatArea from './ChatArea';
 import { supabase } from '../utils/supaBase';
 import { useParams } from 'react-router-dom';
+import io from "socket.io-client";
+
 
 const Chat = () => {
     const [following, setFollowing] = useState([]);
@@ -65,7 +67,28 @@ const Chat = () => {
         }
     };
 
-
+    useEffect(() => {
+        const socket = io("http://localhost:5000");
+    
+        socket.on("user-status", (data) => {
+            setFollowing((prevFollowing) =>
+                prevFollowing.map((user) =>
+                    user._id === data.userId
+                        ? { ...user, online: data.status === "online" }
+                        : user
+                )
+            );
+        });
+    
+        socket.emit("user-login", currentUserId); // Notify server that this user has logged in
+    
+        return () => {
+            socket.emit("user-logout", currentUserId); // Notify server when user logs out or disconnects
+            socket.off("user-status"); // Clean up listener
+            socket.disconnect(); // Disconnect socket
+        };
+    }, [currentUserId]);
+    
 
 
     const handleSelectUser = async (user) => {
@@ -148,7 +171,7 @@ const Chat = () => {
                         <div
                             key={user._id}
                             className={`cursor-pointer p-3 flex items-center border-b hover:bg-gray-100 ${selectedUser?._id === user._id ? "bg-gray-200" : " "
-                                }`}
+                            }`}
                             onClick={() => handleUserClick(user)}
                         >
                             <img
@@ -156,6 +179,8 @@ const Chat = () => {
                                 alt="Profile"
                                 className="w-12 h-12 object-contain rounded-full mr-3"
                             />
+                            <div className={`w-3 h-3 fixed ml-9 mt-7 rounded-full ${user.online ? "bg-green-500" : "bg-gray-400"}`}></div>
+
                             <div className="flex space-x-1">
                                 <p className="font-medium text-lg">{user.name}</p>
                                 {unreadMessages[user._id] > 0 && (
@@ -168,12 +193,14 @@ const Chat = () => {
                             </div>
                         </div>
                     ))}
+
+
                 </div>
             </div>
             {selectedUser ? <div className="flex-1 min-h-screen max-h-screen flex flex-col">
                 <ChatHeader />
                 <ChatArea />
-                <ChatFooter fetchUnreadCounts={fetchUnreadCounts()} />
+                <ChatFooter />
             </div> : <div className="bg-gray-50 flex w-[950px] text-center justify-center items-center h-screen">
                 <div className="bg-white shadow-lg rounded-lg p-6 w-80">
                     <div className="flex items-center ml-16 justify-between  mb-4">

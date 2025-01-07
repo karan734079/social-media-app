@@ -7,6 +7,7 @@ import Modal from 'react-modal';
 import { ToastContainer, toast } from 'react-toastify';
 import { supabase } from '../utils/supaBase';
 import { v4 as uuidv4 } from 'uuid';
+import io from "socket.io-client";
 
 Modal.setAppElement('#root');
 
@@ -30,6 +31,7 @@ const Navbar = () => {
                 setProfilePhoto(response.data.profilePhoto || profileIcon);
                 setProfileName(response.data.name || "Guest");
                 setId(response.data._id);
+                console.log(response.data)
             } catch (err) {
                 console.error("Failed to fetch profile", err.message);
             }
@@ -118,33 +120,47 @@ const Navbar = () => {
         fetchNotifications();
     }, []);
 
-    const handleLogOut = () => {
+    const handleLogOut = async () => {
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will be logged out of your account.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, Logout',
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                localStorage.removeItem('token');
-
-                toast.success('Logout successful!', {
-                    position: 'top-right',
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: 'light',
-                });
-
-                setTimeout(() => navigate('/'), 1000);
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) throw new Error('No token found');
+    
+                    // Notify the backend to update the user's status
+                    await axios.post(`${process.env.REACT_APP_BASE_URL}api/auth/logout`, {}, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+    
+                    // Emit the "user-logout" event to Socket.IO
+                    const socket = io("http://localhost:5000"); // Adjust the URL as needed
+                    socket.emit("user-logout", id); // Notify other users
+    
+                    // Clean up
+                    localStorage.removeItem('token');
+                    socket.disconnect(); // Disconnect the socket for the logged-out user
+                    toast.success('Logout successful!', {
+                        position: 'top-right',
+                        autoClose: 1000,
+                    });
+                    setTimeout(() => navigate('/'), 1000);
+                } catch (err) {
+                    console.error('Error logging out:', err.message);
+                    toast.error('Failed to log out. Please try again.', {
+                        position: 'top-right',
+                        autoClose: 2000,
+                    });
+                }
             }
         });
     };
-
+    
 
     return (
         <nav className="bg-white p-4 justify-between w-1/6 md:w-[20%] h-full shadow-lg fixed">

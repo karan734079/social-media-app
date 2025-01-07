@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../utils/supaBase';
 
 
-const ChatFooter = ({fetchUnreadCounts}) => {
+const ChatFooter = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [message, setMessage] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
