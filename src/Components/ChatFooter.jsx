@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../utils/supaBase';
 
 
-const ChatFooter = () => {
+const ChatFooter = ({fetchUnreadCounts}) => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [message, setMessage] = useState('');
     const [selectedImage, setSelectedImage] = useState(null);
@@ -32,6 +32,7 @@ const ChatFooter = () => {
                 sender_id: currentUserId,
                 receiver_id: selectedUser?._id,
                 image_url: "",
+                is_read: false,
             };
 
             try {
@@ -45,6 +46,7 @@ const ChatFooter = () => {
                             sender_id: newMessage.sender_id,
                             receiver_id: newMessage.receiver_id,
                             image_url: newMessage.image_url,
+                            is_read:newMessage.is_read,
                         },
                     ]);
 
@@ -52,7 +54,6 @@ const ChatFooter = () => {
                     console.error('Supabase error:', error.message);
                     return;
                 }
-
                 setMessage('');
             } catch (err) {
                 console.error('Error sending message:', err.message);

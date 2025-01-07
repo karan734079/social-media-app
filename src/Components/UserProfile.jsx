@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import PostsList from '../Components/PostList';
+import { supabase } from '../utils/supaBase';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -24,10 +25,15 @@ const UserProfile = () => {
         });
         setUser(userResponse.data);
 
-        const postsResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=userId&userId=${userId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
-        setUserPosts(postsResponse.data);
+        const { data: posts, error } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const filteredPosts = posts.filter((post) => post.user_id === userId);
+        setUserPosts(filteredPosts);
 
         const followersResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/followers?userId=${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -57,82 +63,98 @@ const UserProfile = () => {
     setShowFollowing(!showFollowing);
   };
 
-  const handleMessage = () => {
-    alert(`Message feature for ${user.username} is coming soon!`);
+  const closeModal = () => {
+    setShowFollowers(false);
+    setShowFollowing(false);
   };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="h-screen w-full sm:w-[1000px] flex flex-col items-center py-8">
-      <div className="bg-white w-full max-w-4xl p-8 rounded-lg shadow-xl space-y-6">
-        <div className="flex justify-center items-center flex-col">
-          <img
-            src={user.profilePhoto}
-            alt="Profile"
-            className="rounded-full h-40 w-40 object-contain border-4 border-gray-300 mb-2"
-          />
-          <h2 className="text-3xl font-semibold text-gray-800">{user.name}</h2>
-          <p className="text-lg text-gray-500">@{user.username}</p>
-          <p className="text-lg text-gray-600">{user.email}</p>
-          <p className="text-lg text-gray-600">{user.address}</p>
-        </div>
-
-        <div className="flex items-center ml-60 space-x-3">
-          <div className="space-x-3">
-            <button
-              onClick={fetchFollowers}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300"
-            >
-              Followers: {followers.length}
-            </button>
-            <button
-              onClick={fetchFollowing}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300"
-            >
-              Following: {following.length}
-            </button>
+    <div className="flex flex-col items-center py-8">
+      <div className="w-full max-w-4xl p-4 space-y-6">
+        <div className="flex flex-col sm:flex-row items-center sm:space-x-14">
+          <div className="relative">
+            <img
+              src={user.profilePhoto || "https://via.placeholder.com/150"}
+              alt="Profile"
+              className="rounded-full h-40 w-40 object-contain border-4 border-gray-300"
+            />
           </div>
-          <div>
-            <button
-              onClick={handleMessage}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
-            >
-              Message
-            </button>
+          <div className="text-center sm:text-left">
+            <div className='flex space-x-4'><h2 className="text-3xl font-bold text-gray-800">{user.name}</h2> <button className='text-red-600 rounded p-2 border'>Message</button></div>
+            <h2 className="text-base mt-1">@{user.username}</h2>
+            <h2 className="text-base">{user.email}</h2>
+            <h2 className="text-base">{user.address}</h2>
+            <div className="mt-4 flex space-x-8 text-lg text-gray-600">
+              <div>
+                <strong className="text-gray-800">{userPosts.length || 0}</strong> Posts
+              </div>
+              <button onClick={fetchFollowers} className="text-gray-600">
+                <strong className="text-gray-800">{user.followers?.length || 0}</strong> Followers
+              </button>
+              <button onClick={fetchFollowing} className="text-gray-600">
+                <strong className="text-gray-800">{user.following?.length || 0}</strong> Following
+              </button>
+            </div>
           </div>
         </div>
 
         {showFollowers && (
-          <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-800">Followers</h3>
-            <ul className="mt-4">
-              {followers.map((follower) => (
-                <li key={follower._id} className="py-2 border-b">
-                  <p className="text-gray-700">{follower.username}</p>
-                </li>
-              ))}
-            </ul>
+          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
+            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Followers</h3>
+              <ul>
+                {followers.map((follower) => (
+                  <li key={follower._id} className="flex items-center mb-4">
+                    <img
+                      src={follower.profilePhoto || "https://via.placeholder.com/40"}
+                      alt={follower.username}
+                      className="h-10 w-10 rounded-full mr-4 object-contain"
+                    />
+                    <p className="text-gray-700">{follower.username}</p>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={closeModal}
+                className="mt-4 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
 
         {showFollowing && (
-          <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-800">Following</h3>
-            <ul className="mt-4">
-              {following.map((follow) => (
-                <li key={follow._id} className="py-2 border-b">
-                  <p className="text-gray-700">{follow.username}</p>
-                </li>
-              ))}
-            </ul>
+          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
+            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Following</h3>
+              <ul>
+                {following.map((follow) => (
+                  <li key={follow._id} className="flex items-center mb-4">
+                    <img
+                      src={follow.profilePhoto || "https://via.placeholder.com/40"}
+                      alt={follow.username}
+                      className="h-10 w-10 rounded-full mr-4 object-contain"
+                    />
+                    <p className="text-gray-700">{follow.username}</p>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={closeModal}
+                className="mt-4 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
-
-        <div className="mt-8 w-full max-w-4xl">
-          <PostsList posts={userPosts} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" />
-        </div>
+      </div>
+      <div className="mt-8 w-full max-w-4xl border-t">
+        <PostsList userId={userId} />
       </div>
     </div>
   );

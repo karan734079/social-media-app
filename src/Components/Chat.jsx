@@ -1,316 +1,187 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    setMessages,
-    addMessage,
-} from '../utils/chatSlice';
-import { supabase } from '../utils/supaBase';
-import { useParams } from 'react-router-dom';
-import ChatSidebar from './ChatSidebar';
+import profilePhoto from '../images/Screenshot 2024-05-08 221135.png';
+import { setSelectedUser, setUnreadMessages, setMessages } from '../utils/chatSlice';
 import ChatHeader from './ChatHeader';
 import ChatFooter from './ChatFooter';
+import ChatArea from './ChatArea';
+import { supabase } from '../utils/supaBase';
+import { useParams } from 'react-router-dom';
 
 const Chat = () => {
-    const [wantToDelete, setWantToDelete] = useState(false);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [hasMoreMessages, setHasMoreMessages] = useState(true);
-    const [lastFetchMessage, setLastFetchMessage] = useState(null);
-    const [editingMessageId, setEditingMessageId] = useState(null);
-    const [editingMessageText, setEditingMessageText] = useState('');
-
-    const endRef = useRef(null);
-    const chatRef = useRef(null);
+    const [following, setFollowing] = useState([]);
+    const [showFollowing, setShowFollowing] = useState(false);
+    const { selectedUser, unreadMessages } = useSelector((state) => state.chat);
     const dispatch = useDispatch();
     const { id } = useParams();
     const currentUserId = id;
 
-    const {
-        messages,
-        selectedUser,
-    } = useSelector((state) => state.chat);
-
     useEffect(() => {
-        fetchMessages();
-    }, [selectedUser, dispatch, currentUserId]);
+        fetchFollowing();
+    }, []);
+
+    const fetchFollowing = async () => {
+        if (showFollowing) {
+            setShowFollowing(false);
+        } else {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            setFollowing(response.data);
+            setShowFollowing(true);
+        }
+    };
+
+    // Fetch unread message counts
+    useEffect(() => {
+        if (selectedUser) fetchUnreadCounts();
+    }, [selectedUser]);  // This will fetch the counts on initial load and ensure it's updated
 
 
-    const fetchMessages = async (isPaginated = false) => {
-        if (!selectedUser || (!isPaginated && loadingMore)) return;
-
-        setLoadingMore(true);
-
+    const fetchUnreadCounts = async () => {
         try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-                .order('created_at', { ascending: false })
-                .limit(20)
-                .lt('created_at', lastFetchMessage || new Date().toISOString());
+            const { data, error } = await supabase.rpc("fetch_unread_counts");
 
             if (error) {
-                console.error('Error fetching messages:', error.message);
+                console.error("Error fetching unread counts:", error.message);
                 return;
             }
 
-            if (data.length > 0) {
-                const fetchedMessages = data.reverse().map((msg) => ({
-                    ...msg,
-                    isSender: msg.sender_id === currentUserId,
-                }));
+            const counts = data.reduce((acc, item) => {
+                // Only consider messages where the current user is the receiver
+                if (item.receiver_id === currentUserId) {
+                    acc[item.sender_id] = item.count; // Use sender_id as the key for unread counts
+                }
+                return acc;
+            }, {});
 
-                // Filter out duplicate messages based on unique IDs
-                const uniqueMessages = fetchedMessages.filter(
-                    (newMsg) => !messages.some((existingMsg) => existingMsg.id === newMsg.id)
-                );
-
-                const updatedMessages = isPaginated
-                    ? [...uniqueMessages, ...messages]
-                    : [...uniqueMessages];
-
-                setLastFetchMessage(data[data.length - 1]?.created_at || null);
-                dispatch(setMessages(updatedMessages));
-            } else {
-                setHasMoreMessages(false);
-            }
+            // Dispatch unread message counts to Redux
+            dispatch(setUnreadMessages(counts));
         } catch (err) {
-            console.error('Error fetching messages:', err.message);
-        } finally {
-            setLoadingMore(false);
+            console.error("Error fetching unread counts:", err.message);
+        }
+    };
+
+
+
+
+    const handleSelectUser = async (user) => {
+        try {
+            // Set the selected user in the Redux store
+            dispatch(setSelectedUser(user));
+
+            // Fetch messages between the current user and the selected user
+            const { data, error } = await supabase
+                .from("messages")
+                .select("*")
+                .or(`sender_id.eq.${user._id},receiver_id.eq.${user._id}`)
+                .order("created_at", { ascending: true });
+
+            if (error) {
+                console.error("Error fetching messages:", error.message);
+                return;
+            }
+
+            // Update the messages state in the Redux store
+            dispatch(setMessages(data || []));
+
+            // Mark unread messages as read (in the database)
+            const unreadMessages = data?.filter(
+                (msg) => msg.receiver_id === currentUserId && !msg.is_read
+            );
+
+            if (unreadMessages?.length > 0) {
+                const idsToUpdate = unreadMessages.map((msg) => msg.id);
+                const { error: updateError } = await supabase
+                    .from("messages")
+                    .update({ is_read: true })
+                    .in("id", idsToUpdate);
+
+                if (updateError) {
+                    console.error("Error updating unread messages:", updateError.message);
+                }
+
+                // After marking messages as read, immediately fetch the updated unread counts
+                await fetchUnreadCounts();  // Ensure the unread count is updated after marking as read
+            }
+
+        } catch (err) {
+            console.error("Error selecting user:", err.message);
         }
     };
 
 
     useEffect(() => {
-        if (endRef.current && messages.length > 0) {
-            endRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [messages]);
-
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (chatRef.current.scrollTop === 0 && hasMoreMessages && !loadingMore) {
-                const currentScrollHeight = chatRef.current.scrollHeight;
-                fetchMessages(true).then(() => {
-                    const newScrollHeight = chatRef.current.scrollHeight;
-                    chatRef.current.scrollTop = newScrollHeight - currentScrollHeight;
-                });
-            }
-        };
-
-        const chatDiv = chatRef.current;
-        if (chatDiv) {
-            chatDiv.addEventListener('scroll', handleScroll);
-            return () => chatDiv.removeEventListener('scroll', handleScroll);
-        }
-    }, [hasMoreMessages, loadingMore]);
-
-
-    useEffect(() => {
-        const channel = supabase
+        const messageListener = supabase
             .channel('messages')
             .on('postgres_changes', { event: 'INSERT', table: 'messages' }, (payload) => {
-                if (
-                    payload.new.receiver_id === currentUserId ||
-                    payload.new.sender_id === currentUserId
-                ) {
-                    const incomingMessage = {
-                        id: payload.new.id,
-                        text: payload.new.text,
-                        isSender: payload.new.sender_id === currentUserId,
-                        sender_id: payload.new.sender_id,
-                        receiver_id: payload.new.receiver_id,
-                        image_url:payload.new.image_url,
-                    };
+                const newMessage = payload.new;
 
-                    dispatch(addMessage(incomingMessage));
+                // Only fetch unread counts if the current user is the receiver of the new message
+                if (newMessage.receiver_id === currentUserId) {
+                    fetchUnreadCounts();
                 }
             })
             .subscribe();
 
+        // Cleanup the listener on component unmount
         return () => {
-            channel.unsubscribe(); 
+            messageListener.unsubscribe();
         };
-    }, [dispatch, currentUserId]); 
+    }, []);
 
-    const handleDeleteMessage = async (messageId, imageUrl) => {
-        try {
-            const { error: deleteError } = await supabase
-                .from('messages')
-                .delete()
-                .eq('id', messageId);
-
-            if (deleteError) {
-                console.error('Error deleting message:', deleteError.message);
-                return;
-            }
-
-            if (imageUrl) {
-                const fileName = imageUrl.split('/').pop();
-
-                const { error: storageError } = await supabase.storage
-                    .from('images')
-                    .remove([fileName]);
-
-                if (storageError) {
-                    console.error('Error deleting image from storage:', storageError.message);
-                    return;
-                }
-
-                console.log('Image deleted from storage successfully');
-            }
-
-            dispatch(setMessages(messages.filter((msg) => msg.id !== messageId)));
-
-        } catch (err) {
-            console.error('Error deleting message or image:', err.message);
-        }
+    const handleUserClick = (user) => {
+        handleSelectUser(user);
     };
-
-
-    const handleDeleteButtonClick = (messageId, imageUrl) => {
-        setWantToDelete(true);
-        handleDeleteMessage(messageId, imageUrl);
-    };
-
-
-    const handleUpdateMessage = async () => {
-        if (!editingMessageText.trim()) return;
-
-        try {
-            const { error } = await supabase.from('messages').update({ text: editingMessageText }).eq('id', editingMessageId);
-
-            if (error) {
-                console.error("error updating message", error.message);
-            }
-
-            const updatedMessages = messages.map((msg) => msg.id === editingMessageId ? { ...msg, text: editingMessageText } : msg);
-            dispatch(setMessages(updatedMessages));
-
-            setEditingMessageId(null);
-            setEditingMessageText("");
-        } catch (err) {
-            console.error("error updating message", err.message);
-        }
-    }
 
     return (
         <div className="h-full w-full flex items-start">
-            {/* chat list */}
-            <ChatSidebar />
-
-            {/* Chat Area */}
-            <div className="flex-1 min-h-screen max-h-screen flex flex-col">
-                <ChatHeader />
-
-                <div className="flex-1 p-4 overflow-y-auto scroll-bar bg-white" ref={chatRef}>
-                    {loadingMore && (
-                        <div className="text-center text-gray-600 my-4">Loading previous messages...</div>
-                    )}
-
-                    <div className="">
-                        {messages
-                            .filter(
-                                (msg) =>
-                                    (msg.sender_id === currentUserId && msg.receiver_id === selectedUser?._id) ||
-                                    (msg.receiver_id === currentUserId && msg.sender_id === selectedUser?._id)
-                            ).map((msg, index) => (
-                                <div
-                                    key={index}
-                                    className={`relative group flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
-                                >
-
-                                    <div className={`absolute hidden -my-5 mx-1 group-hover:block`}>
-                                        <button
-                                            className="text-gray-500 hover:text-gray-800"
-                                            onClick={() => {
-                                                setWantToDelete((prev) => (prev === msg.id ? null : msg.id));
-                                            }}
-                                        >
-                                            {msg.isSender && <i className="fas fa-ellipsis-v"></i>}
-                                        </button>
-                                    </div>
-
-                                    {wantToDelete === msg.id && msg.sender_id === currentUserId && (
-                                        <div className="absolute top-0 text-xl w-32 text-center right-0 mt-1 bg-white border border-gray-300 shadow-lg rounded-md z-10">
-                                            <ul className="text-sm">
-                                                <li
-                                                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                                                    onClick={() => {
-                                                        setEditingMessageId(msg.id);
-                                                        setEditingMessageText(msg.text);
-                                                        setWantToDelete(false);
-                                                    }}
-                                                >
-                                                    Update
-                                                </li>
-                                                <li
-                                                    className="px-4 py-2 hover:bg-gray-200 cursor-pointer hover:text-red-600"
-                                                    onClick={() => {
-                                                        handleDeleteButtonClick(msg.id, msg.image_url);
-                                                    }}
-                                                >
-                                                    Delete
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {/* Message Bubble */}
-                                    {editingMessageId === msg.id ? (
-                                        <div className="flex items-center">
-                                            <input
-                                                type="text"
-                                                value={editingMessageText}
-                                                onChange={(e) => setEditingMessageText(e.target.value)}
-                                                className="p-2 rounded-lg bg-red-200 outline-none border-gray-300 flex-1"
-                                                autoFocus
-                                            />
-                                            <button
-                                                onClick={handleUpdateMessage}
-                                                className="ml-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-800"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setEditingMessageId(null);
-                                                    setEditingMessageText('');
-                                                }}
-                                                className="ml-2 px-4 py-2 text-sm bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div
-                                            className={`p-2 rounded-lg cursor-pointer inline-block ${msg.isSender ? 'bg-red-200 text-right' : 'bg-gray-300 text-left'}`}
-                                            style={{
-                                                maxWidth: '75%',
-                                                width: 'fit-content',
-                                            }}
-                                        >
-                                            {msg.text && <p>{msg.text}</p>}
-                                            {msg.image_url && (
-                                                <img
-                                                    src={msg.image_url}
-                                                    alt="message content"
-                                                    className="mt-2 w-full max-w-xs rounded-lg"
-                                                />
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                    </div>
-                    {/* End ref for auto-scrolling */}
-                    <div ref={endRef}></div>
+            <div className="min-h-screen bg-white w-[30%] border-r ">
+                <div className="flex items-center justify-between p-4 text-red-600 font-bold border-b">
+                    <span className="text-3xl">Chats</span>
                 </div>
-
-                <ChatFooter />
+                <div className="overflow-y-auto scroll-bar h-[calc(100%-4rem)]">
+                    {following.map((user) => (
+                        <div
+                            key={user._id}
+                            className={`cursor-pointer p-3 flex items-center border-b hover:bg-gray-100 ${selectedUser?._id === user._id ? "bg-gray-200" : " "
+                                }`}
+                            onClick={() => handleUserClick(user)}
+                        >
+                            <img
+                                src={user.profilePhoto || profilePhoto}
+                                alt="Profile"
+                                className="w-12 h-12 object-contain rounded-full mr-3"
+                            />
+                            <div className="flex space-x-1">
+                                <p className="font-medium text-lg">{user.name}</p>
+                                {unreadMessages[user._id] > 0 && (
+                                    <div className='w-5 h-5 mt-1 rounded-full flex items-center text-center justify-center bg-red-600'>
+                                    <span className="text-xs text-white rounded-full">
+                                {unreadMessages[user._id]}
+                                    </span>
+                                </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
+            {selectedUser ? <div className="flex-1 min-h-screen max-h-screen flex flex-col">
+                <ChatHeader />
+                <ChatArea />
+                <ChatFooter fetchUnreadCounts={fetchUnreadCounts()} />
+            </div> : <div className="bg-gray-50 flex w-[950px] text-center justify-center items-center h-screen">
+                <div className="bg-white shadow-lg rounded-lg p-6 w-80">
+                    <div className="flex items-center ml-16 justify-between  mb-4">
+                        <h2 className="text-xl font-semibold text-red-600"><i className="fa-regular p-2 fa-message text-red-600 mt-2 "></i>Start a Chat</h2>
+                    </div>
+                    <p className="text-gray-500 mb-4 text-sm">Select a user from the list to start chatting:</p>
+                </div>
+            </div>}
         </div>
     );
 };

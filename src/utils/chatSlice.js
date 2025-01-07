@@ -16,14 +16,27 @@ const chatSlice = createSlice({
     searchResults: [],
     isNotFound: false,
     selectedUser: null,
+    unreadMessages: {},
   },
   reducers: {
     setMessages: (state, action) => {
       state.messages = action.payload;
     },
     addMessage: (state, action) => {
-      if (!state.messages.some((msg) => msg.id === action.payload.id)) {
-        state.messages.push(action.payload);
+      const message = action.payload;
+      state.messages.push(message);
+
+      // Increment unread messages if not for the selected user
+      if (
+        message.receiver_id !== state.selectedUser?._id &&
+        message.sender_id !== state.selectedUser?._id
+      ) {
+        const userId =
+          message.sender_id === state.currentUserId
+            ? message.receiver_id
+            : message.sender_id;
+        state.unreadMessages[userId] =
+          (state.unreadMessages[userId] || 0) + 1;
       }
     },
     setSelectedUsers: (state, action) => {
@@ -43,6 +56,14 @@ const chatSlice = createSlice({
     },
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
+
+      // Reset unread count for the selected user
+      if (action.payload?._id) {
+        state.unreadMessages[action.payload._id] = 0;
+      }
+    },
+    setUnreadMessages: (state, action) => {
+      state.unreadMessages = action.payload;
     },
   },
 });
@@ -56,6 +77,7 @@ export const {
   setSearchResults,
   setIsNotFound,
   setSelectedUser,
+  setUnreadMessages,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

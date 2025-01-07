@@ -5,6 +5,8 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import Modal from 'react-modal';
 import { ToastContainer, toast } from 'react-toastify';
+import { supabase } from '../utils/supaBase';
+import { v4 as uuidv4 } from 'uuid';
 
 Modal.setAppElement('#root');
 
@@ -51,48 +53,52 @@ const Navbar = () => {
         }
     };
 
+
     const handleUpload = async () => {
         if (!selectedFile || !caption.trim()) {
             Swal.fire("Error", "Please select a file and add a caption", "error");
             return;
         }
 
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        formData.append("caption", caption);
-
         try {
-            await axios.post(`${process.env.REACT_APP_BASE_URL}api/auth/posts`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+            const fileName = `${Date.now()}_${selectedFile.name}`;
+            const { data, error } = await supabase.storage
+                .from('posts')
+                .upload(fileName, selectedFile);
 
-            toast.success('Post Created successfully', {
+            if (error) throw error;
+
+            const mediaUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/posts/${data.path}`;
+
+            const { error: insertError } = await supabase
+                .from('posts')
+                .insert([
+                    {
+                        id : uuidv4(),
+                        user_id: id,
+                        caption,
+                        media_url: mediaUrl,
+                        media_type: selectedFile.type.includes('video') ? 'video' : 'image',
+                        profilePhoto : profilePhoto,
+                        profileName : profileName,
+                    },
+                ]);
+
+            if (insertError) throw insertError;
+
+            toast.success('Post created successfully!', {
                 position: 'top-right',
                 autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'light',
             });
+
             setIsCreateModalOpen(false);
             setSelectedFile(null);
             setCaption('');
         } catch (err) {
             console.error("Error uploading post:", err.message);
-            toast.success('Error Uploading Post', {
+            toast.error('Error uploading post', {
                 position: 'top-right',
                 autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: 'light',
             });
         }
     };

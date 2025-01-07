@@ -1,155 +1,13 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import profileIcon from "../images/Screenshot_2024-12-02_111230-removebg-preview.png";
-// import { formatDistanceToNow } from "date-fns";
-
-// const Posts = () => {
-//   const [posts, setPosts] = useState([]);
-//   const [userId, setUserId] = useState(null);
-
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       try {
-//         const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/profile`, {
-//           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//         });
-//         setUserId(response.data._id);
-//       } catch (err) {
-//         console.error("Failed to fetch profile:", err.message);
-//       }
-//     };
-
-//     fetchProfile();
-//   }, []);
-
-//   useEffect(() => {
-//     const fetchPosts = async () => {
-//       try {
-//         const response = await axios.get(
-//           `${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=currentUser`,
-//           {
-//             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//           }
-//         );
-//         setPosts(response.data);
-//       } catch (err) {
-//         console.error("Error fetching posts:", err.message);
-//       }
-//     };
-
-//     if (userId) fetchPosts();
-//   }, [userId]);
-
-//   const handleLike = async (postId, isLiked) => {
-//     try {
-//       const response = await axios.put(
-//         `${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}/like`,
-//         {},
-//         {
-//           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//         }
-//       );
-//       const updatedPost = posts.map((post) =>
-//         post._id === postId
-//           ? { ...post, likes: response.data.likes, isLiked: !isLiked }
-//           : post
-//       );
-//       setPosts(updatedPost);
-//     } catch (err) {
-//       console.error("Error liking post:", err.message);
-//     }
-//   };
-
-//   const handleDelete = async (postId) => {
-//     try {
-//       const postToDelete = posts.find(post => post._id === postId);
-//       if (postToDelete.user._id !== userId) {
-//         alert("You can only delete your own posts.");
-//         return;
-//       }
-
-//       await axios.delete(`${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}`, {
-//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//       });
-
-//       setPosts(posts.filter((post) => post._id !== postId));
-//     } catch (err) {
-//       console.error("Error deleting post:", err.message);
-//     }
-//   };
-
-//   return (
-//     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-5 mt-10">
-//       {posts.map((post) => (
-//         <div
-//           className="bg-white shadow-md rounded-md p-4 flex flex-col justify-between items-center max-w-[400px] w-full"
-//           key={post._id}
-//         >
-//           <div className="font-semibold flex justify-between w-full pb-3 border-b-2">
-//             <div className="flex items-center space-x-2">
-//               <img
-//                 src={post.user?.profilePhoto || profileIcon}
-//                 alt="Profile"
-//                 className="h-10 w-10 rounded-full object-contain ring-2 ring-gray-200"
-//               />
-//               <span className="text-md">{post.user?.username || "Unknown User"}</span>
-//             </div>
-
-//             {post.user._id === userId && (
-//               <button
-//                 onClick={() => handleDelete(post._id)}
-//                 className="text-red-500 hover:text-red-700 text-xl"
-//               >
-//                 X
-//               </button>
-//             )}
-//           </div>
-
-//           {post.mediaType === "video" ? (
-//             <video
-//               controls
-//               src={post.mediaUrl}
-//               className="w-full h-[400px] object-cover rounded-md mt-3"
-//             />
-//           ) : (
-//             <img
-//               src={post.mediaUrl}
-//               alt="Post"
-//               className="w-full h-[400px] object-cover rounded-md mt-3"
-//             />
-//           )}
-
-//           <div className="mr-auto mt-2 text-sm">
-//             {post.caption}
-//           </div>
-
-//           <div className="mt-3 w-full text-gray-600 flex justify-between items-center text-sm border-t-2 pt-2">
-//             <button
-//               className={`flex items-center text-sm ${post.isLiked ? 'text-blue-500' : 'text-gray-400'}`}
-//               onClick={() => handleLike(post._id, post.isLiked)}
-//             >
-//               <i className="fa-solid fa-thumbs-up mx-1 mt-2"></i>
-//               <span className="mt-2">{post.likes} likes</span>
-//             </button>
-//             <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
-//           </div>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Posts;
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { supabase } from "../utils/supaBase";
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [userId, setUserId] = useState(null);
-
   const [selectedPost, setSelectedPost] = useState(null);
 
+  // Fetch the profile information to get the userId
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -165,53 +23,100 @@ const Posts = () => {
     fetchProfile();
   }, []);
 
+  // Fetch posts and their associated comments
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/getPosts?filter=currentUser`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setPosts(response.data);
+        const { data: posts, error } = await supabase
+          .from("posts")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Filter posts based on the current user
+        const filteredPosts = posts.filter((post) => post.user_id === userId);
+
+        // Fetch comments for these posts
+        const postIds = filteredPosts.map((post) => post.id);
+        const { data: commentsData, error: commentsError } = await supabase
+          .from("comments")
+          .select("*")
+          .in("post_id", postIds); // Get all comments for these posts
+
+        if (commentsError) throw commentsError;
+
+        // Store comments in state grouped by post_id
+        const commentsByPost = commentsData.reduce((acc, comment) => {
+          acc[comment.post_id] = acc[comment.post_id] || [];
+          acc[comment.post_id].push(comment);
+          return acc;
+        }, {});
+
+        // Update the posts state with the associated comments
+        const postsWithComments = filteredPosts.map((post) => ({
+          ...post,
+          comments: commentsByPost[post.id] || [],
+        }));
+
+        setPosts(postsWithComments);
       } catch (err) {
         console.error("Error fetching posts:", err.message);
       }
     };
 
-    fetchPosts();
-  }, []);
+    if (userId) fetchPosts(); // Fetch posts once the userId is available
+  }, [userId]);
 
   const openModal = (post) => setSelectedPost(post);
   const closeModal = () => setSelectedPost(null);
 
   const handleDelete = async (postId) => {
     try {
-      const postToDelete = posts.find(post => post._id === postId);
-      if (postToDelete.user._id !== userId) {
-        alert("You can only delete your own posts.");
+      // Extract the filename from the post's media_url
+      const fileName = postId.split('/').pop();
+
+      // Delete the file from Supabase storage
+      const { error: storageError } = await supabase.storage
+        .from('posts')
+        .remove([fileName]);
+
+      if (storageError) {
+        console.error('Error deleting image from storage:', storageError.message);
         return;
       }
+      console.log('Image deleted from storage successfully');
 
-      await axios.delete(`${process.env.REACT_APP_BASE_URL}api/auth/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      // Delete the post record from Supabase database
+      const { error: deleteError } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
 
-      setPosts(posts.filter((post) => post._id !== postId));
+      if (deleteError) {
+        console.error('Error deleting post from database:', deleteError.message);
+        return;
+      }
+      console.log('Post deleted from database successfully');
+
+      // Update the state to remove the deleted post
+      setPosts(posts.filter((post) => post.id !== postId));
     } catch (err) {
-      console.error("Error deleting post:", err.message);
+      console.error('Error during deletion:', err.message);
     }
   };
 
   return (
-    <div className="grid grid-cols-3 gap-4 p-6">
+    <div className="grid grid-cols-3 gap-16 gap-y-10 p-6">
       {posts.map((post) => (
         <div
-          key={post._id}
-          className="relative group cursor-pointer w-full h-48 bg-gray-100 shadow-md rounded-lg overflow-hidden"
+          key={post.id}
+          className="relative group cursor-pointer  w-72  h-72  bg-gray-50 shadow-md rounded-lg overflow-hidden"
           onClick={() => openModal(post)}
         >
-          {post.mediaType === "video" ? (
+          {post.media_type === "video" ? (
             <video
-              src={post.mediaUrl}
+              src={post.media_url}
               className="w-full h-full object-contain"
               muted
               loop
@@ -219,14 +124,14 @@ const Posts = () => {
             />
           ) : (
             <img
-              src={post.mediaUrl}
+              src={post.media_url}
               alt="Post"
               className="w-full h-full object-contain"
             />
           )}
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
             <p className="text-white text-lg">
-              ❤️ {post.likes} &middot; 🗨️ {post.comments?.length || 0}
+              ❤️ {post.likes} &middot; 🗨️ {post.comments.length}
             </p>
           </div>
         </div>
@@ -236,15 +141,15 @@ const Posts = () => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
           <div className="bg-white max-w-2xl max-h-96 w-full rounded-lg shadow-lg overflow-hidden flex">
             <div className="w-2/3 bg-gray-100">
-              {selectedPost.mediaType === "video" ? (
+              {selectedPost.media_type === "video" ? (
                 <video
                   controls
-                  src={selectedPost.mediaUrl}
+                  src={selectedPost.media_url}
                   className="w-full h-full object-contain"
                 />
               ) : (
                 <img
-                  src={selectedPost.mediaUrl}
+                  src={selectedPost.media_url}
                   alt="Post"
                   className="w-full h-full object-contain"
                 />
@@ -257,10 +162,35 @@ const Posts = () => {
                   ❤️ {selectedPost.likes} likes
                 </span>
               </div>
+
+              {/* Displaying Comments */}
+              <div className="flex-grow overflow-y-auto scroll-bar">
+                <h3 className="font-semibold text-md">Comments</h3>
+                <div className="space-y-2 mt-2 ">
+                  {selectedPost.comments.length > 0 ? (
+                    selectedPost.comments.map((comment) => (
+                      <div key={comment.id} className="flex items-start space-x-3">
+                        <img
+                          src={comment.profilePhoto}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full object-contain"
+                        />
+                        <div>
+                          <span className="font-semibold">{comment.profileName}</span>
+                          <p className="text-sm text-gray-600">{comment.text}</p>
+                        </div>
+                      </div>
+                    ))  
+                  ) : (
+                    <p className="text-sm text-gray-600">No comments yet...</p>
+                  )}
+                </div>
+              </div>
+
               <div className="mt-auto">
                 <button
                   onClick={() => {
-                    handleDelete(selectedPost._id); // Call the delete function
+                    handleDelete(selectedPost.id); // Call the delete function
                     closeModal(); // Close the modal
                   }}
                   className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 w-full mb-4"
@@ -275,8 +205,7 @@ const Posts = () => {
                 </button>
               </div>
             </div>
-
-          </div>
+          </div>    
         </div>
       )}
     </div>
@@ -284,5 +213,3 @@ const Posts = () => {
 };
 
 export default Posts;
-
-
