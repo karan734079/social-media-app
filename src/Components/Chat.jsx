@@ -179,7 +179,7 @@ const Chat = () => {
                                 alt="Profile"
                                 className="w-12 h-12 object-contain rounded-full mr-3"
                             />
-                            <div className={`w-3 h-3 fixed ml-9 mt-7 rounded-full ${user.online ? "bg-green-500" : "bg-gray-400"}`}></div>
+                            <div className={`w-3 h-3 absolute ml-9 mt-7 rounded-full ${user.online ? "bg-green-500" : "hidden"}`}></div>
 
                             <div className="flex space-x-1">
                                 <p className="font-medium text-lg">{user.name}</p>
@@ -198,7 +198,7 @@ const Chat = () => {
                 </div>
             </div>
             {selectedUser ? <div className="flex-1 min-h-screen max-h-screen flex flex-col">
-                <ChatHeader />
+                <ChatHeader/>
                 <ChatArea />
                 <ChatFooter />
             </div> : <div className="bg-gray-50 flex w-[950px] text-center justify-center items-center h-screen">

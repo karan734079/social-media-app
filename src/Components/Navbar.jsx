@@ -31,7 +31,6 @@ const Navbar = () => {
                 setProfilePhoto(response.data.profilePhoto || profileIcon);
                 setProfileName(response.data.name || "Guest");
                 setId(response.data._id);
-                console.log(response.data)
             } catch (err) {
                 console.error("Failed to fetch profile", err.message);
             }

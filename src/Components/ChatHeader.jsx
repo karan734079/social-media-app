@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 
 const ChatHeader = () => {
-    const {selectedUser} = useSelector((state)=>state.chat)
+    const {selectedUser} = useSelector((state)=>state.chat);
 
     return (
         <div className="flex items-center justify-between p-[10px] bg-red-600 text-white border-b">
@@ -16,7 +16,7 @@ const ChatHeader = () => {
                 />
                 <div>
                     <p className="font-medium text-xl">{selectedUser?.name || 'Select a user'}</p>
-                    <p className="text-sm">{selectedUser ? 'Active' : 'Select a user'}</p>
+                    <p className="text-sm">{selectedUser.online ? 'Online' : 'Offline'}</p>
                 </div>
             </div>
             <div className="flex space-x-4 text-gray-200 mr-2 text-xl">
