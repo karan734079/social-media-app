@@ -164,7 +164,7 @@ const Navbar = () => {
     return (
         <nav className="bg-white p-4 justify-between w-1/6 md:w-[20%] h-full shadow-lg fixed">
             <div className="font-bold text-start p-3 text-3xl text-red-600 hover:text-red-700">
-                <Link to={'/browse'}>Linknest</Link>
+                <Link to={'/browse'} onClick={handleLogOut}>Linknest</Link>
             </div>
             <Link to={'/profile'}>
                 <span className='m-6 flex space-x-2 transition-transform transform hover:scale-105'>

@@ -37,10 +37,9 @@ const Chat = () => {
         }
     };
 
-    // Fetch unread message counts
     useEffect(() => {
         if (selectedUser) fetchUnreadCounts();
-    }, [selectedUser]);  // This will fetch the counts on initial load and ensure it's updated
+    }, [selectedUser]);
 
 
     const fetchUnreadCounts = async () => {
@@ -53,14 +52,13 @@ const Chat = () => {
             }
 
             const counts = data.reduce((acc, item) => {
-                // Only consider messages where the current user is the receiver
+               
                 if (item.receiver_id === currentUserId) {
-                    acc[item.sender_id] = item.count; // Use sender_id as the key for unread counts
+                    acc[item.sender_id] = item.count;
                 }
                 return acc;
             }, {});
 
-            // Dispatch unread message counts to Redux
             dispatch(setUnreadMessages(counts));
         } catch (err) {
             console.error("Error fetching unread counts:", err.message);
@@ -80,12 +78,12 @@ const Chat = () => {
             );
         });
     
-        socket.emit("user-login", currentUserId); // Notify server that this user has logged in
+        socket.emit("user-login", currentUserId);
     
         return () => {
-            socket.emit("user-logout", currentUserId); // Notify server when user logs out or disconnects
-            socket.off("user-status"); // Clean up listener
-            socket.disconnect(); // Disconnect socket
+            socket.emit("user-logout", currentUserId);
+            socket.off("user-status");
+            socket.disconnect();
         };
     }, [currentUserId]);
     
