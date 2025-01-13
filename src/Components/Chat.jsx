@@ -67,6 +67,7 @@ const Chat = () => {
 
     useEffect(() => {
         const socket = io("http://localhost:5000");
+        console.log("ffff", socket.id);
     
         socket.on("user-status", (data) => {
             setFollowing((prevFollowing) =>

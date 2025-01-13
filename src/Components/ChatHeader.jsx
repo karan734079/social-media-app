@@ -11,7 +11,7 @@ const ChatHeader = () => {
   const { selectedUser } = useSelector((state) => state.chat); // Get the selected user from Redux state
   const [showVideoChat, setShowVideoChat] = useState(false);
   const [callStatus, setCallStatus] = useState(""); // Tracks call-related messages
-  const [callerInfo, setCallerInfo] = useState(null);// Stores info about incoming calls
+  const [callerInfo, setCallerInfo] = useState({}); // Stores info about incoming calls
   const { id } = useParams();
   const currentUserId = id;
 
@@ -29,8 +29,11 @@ const ChatHeader = () => {
       to: selectedUser._id, // Target user ID
       callerName: "Your Name Here", // Replace with the current user's name
       callerSocketId: socket.id, // Caller's socket ID
-    });
+    }
+    ); 
+    console.log("caller socket id = ", socket.id);
   };
+
 
 
   const acceptCall = () => {
@@ -38,7 +41,7 @@ const ChatHeader = () => {
       console.log("Accepting call from:", callerInfo);
       socket.emit("accept-call", { callerSocketId: callerInfo.callerSocketId });
       setShowVideoChat(true);
-      setCallerInfo(null); // Clear caller info after accepting
+      setCallerInfo({}); // Clear caller info after accepting
     }
   };
 
@@ -46,9 +49,11 @@ const ChatHeader = () => {
     if (callerInfo?.callerSocketId) {
       console.log("Declining call from:", callerInfo);
       socket.emit("decline-call", { callerSocketId: callerInfo.callerSocketId });
-      setCallerInfo(null); // Clear caller info after declining
+      setCallerInfo({}); // Clear caller info after declining
     }
   };
+
+  console.log('after',socket.id)
 
   useEffect(() => {
     socket.on("incoming-call", ({ from, callerSocketId, callerName }) => {
@@ -56,7 +61,12 @@ const ChatHeader = () => {
       setCallerInfo({ from, callerSocketId, callerName });
     });
 
+    return () => {
+      socket.off("incoming-call");
+    };
+  }, [])
 
+  useEffect(() => {
     socket.on("call-status", ({ status }) => {
       console.log("Call status update:", status);
       setCallStatus(status);
@@ -74,7 +84,6 @@ const ChatHeader = () => {
     });
 
     return () => {
-      socket.off("incoming-call");
       socket.off("call-status");
       socket.off("call-accepted");
       socket.off("call-declined");
@@ -83,27 +92,19 @@ const ChatHeader = () => {
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Recipient connected to socket with ID:", socket.id);
+      console.log("Connected to socket server with ID:", socket.id);
     });
+    socket.emit("user-login", currentUserId);
 
     socket.on("disconnect", () => {
-      console.log("Recipient disconnected from socket.");
-    });
-  }, []);
-
-
-  useEffect(() => {
-    console.log("Listening for 'incoming-call' events...");
-    socket.on("incoming-call", (data) => {
-      console.log("Incoming call event received:", data);
-      setCallerInfo({ ...data }); // Update state to trigger popup
+      console.log("Disconnected from socket server");
     });
 
     return () => {
-      socket.off("incoming-call");
+      socket.off("connect");
+      socket.off("disconnect");
     };
   }, []);
-
 
   return (
     <>
@@ -127,14 +128,29 @@ const ChatHeader = () => {
       {callStatus && <p>{callStatus}</p>}
 
       {/* Incoming Call Popup */}
-      {callerInfo && (
-        <div className="popup">
-          <p>{callerInfo.callerName} is calling you...</p>
-          <button onClick={acceptCall}>Accept</button>
-          <button onClick={declineCall}>Decline</button>
+      {callerInfo.from && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+            <p className="text-center font-medium mb-4">
+              {callerInfo.callerName || "Someone"} is calling you...
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={acceptCall}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Accept
+              </button>
+              <button
+                onClick={declineCall}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
 
       {/* Video Chat Component */}
       {showVideoChat && (
