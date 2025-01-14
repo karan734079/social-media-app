@@ -53,8 +53,6 @@ const ChatHeader = () => {
     }
   };
 
-  console.log('after',socket.id)
-
   useEffect(() => {
     socket.on("incoming-call", ({ from, callerSocketId, callerName }) => {
       console.log("Incoming call received:", { from, callerSocketId, callerName });
