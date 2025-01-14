@@ -118,8 +118,10 @@ const ChatHeader = () => {
             <p>{selectedUser?.online ? "Online" : "Offline"}</p>
           </div>
         </div>
-        <div>
+        <div className="space-x-3">
           <i className="fas fa-video cursor-pointer" onClick={startCall}></i>
+          <i className="fas fa-phone cursor-pointer"></i>
+          <i className="fas fa-search cursor-pointer"></i>
         </div>
       </div>
 
