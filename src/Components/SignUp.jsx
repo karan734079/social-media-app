@@ -34,7 +34,7 @@ const SignUp = () => {
 
 
     } catch (err) {
-      toast.success('Registartion failed', {
+      toast.error('Registartion failed', {
         position: 'top-right',
         autoClose: 2000,
         hideProgressBar: false,
@@ -48,11 +48,12 @@ const SignUp = () => {
   };  
 
   return (
-    <div>
+    <div className=''>
       <div className='items-center text-center justify-center'>
         <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
-        <div className="flex items-center justify-center text-center bg-white text-black space-x-10">
-          <div className="flex flex-col items-center bg-red-600 px-8 py-10 space-y-4 max-w-sm w-full rounded-lg opacity-95">
+        <div className="flex items-center justify-center md:justify-around text-center bg-white text-black mx-2">
+          <div className="flex flex-col items-center bg-red-600 px-8 py-10 space-y-4 max-w-sm w-full rounded-lg opacity-95 drop-shadow-lg">
+          <h1 className='text-4xl text-white font-semibold'>Register</h1>
             <form className="w-full space-y-4" onSubmit={handleSignUp}>
               <input
                 type="email"
@@ -85,14 +86,13 @@ const SignUp = () => {
                 Sign Up
               </button>
             </form>
-            <div className="text-center text-black mt-4">
-              Already have a Account?
-              <Link to={'/'} className="text-black hover:underline font-semibold text-lg">
+            <div className="text-center text-white mt-4">
+              Already have a Account? <Link to={'/'} className="text-black hover:underline font-semibold text-lg">
                 Log In
               </Link>
             </div>
           </div>
-          <div>
+          <div className='hidden md:block'>
             <Lottie className='w-[400px] h-[500px] mb-4' animationData={robo} />
           </div>
         </div>

@@ -183,7 +183,7 @@ const VideoChat = ({ onClose, socket, selectedUser }) => {
             <img
               src={selectedUser?.profilePhoto || "https://via.placeholder.com/40"}
               alt="User"
-              className="w-10 h-10 rounded-full mr-3"
+              className="w-10 h-10 object-contain bg-white rounded-full mr-3"
             />
             <div>
               <p className="font-medium">{selectedUser?.name || "User"}</p>
@@ -235,7 +235,7 @@ const VideoChat = ({ onClose, socket, selectedUser }) => {
         <div className="flex justify-center space-x-6 rounded-b-lg bg-gray-800 p-4">
           <button
             onClick={createOffer} // Call createOffer here
-            className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700"
+            className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white hover:bg-green-700"
           >
             <i className="fas fa-phone"></i>
           </button>
@@ -247,7 +247,7 @@ const VideoChat = ({ onClose, socket, selectedUser }) => {
           </button>
           <button
             onClick={toggleMute}
-            className={`w-14 h-14 rounded-full flex items-center justify-center text-white ${isMuted ? "bg-gray-600 hover:bg-gray-700" : "bg-green-600 hover:bg-green-700"
+            className={`w-14 h-14 rounded-full flex items-center justify-center text-white ${isMuted ? "bg-gray-600 hover:bg-gray-700" : "bg-blue-600 hover:bg-blue-700"
               }`}
           >
             <i className={isMuted ? "fas fa-microphone-slash" : "fas fa-microphone"}></i>

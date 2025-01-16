@@ -184,8 +184,8 @@ const Navbar = () => {
                         <p>Home</p>
                     </span>
                 </Link>
-                <Link to={`/chat/${id}`}>
-                    <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'>
+                <Link to={`/chat/${id}/${profileName}`}>
+                    <span className='shadow-sm m-3 flex space-x-2 transition-transform transform hover:scale-105'> 
                         <i className="fa-regular fa-message text-red-600 mt-2 "></i>
                         <p>Messages</p>
 

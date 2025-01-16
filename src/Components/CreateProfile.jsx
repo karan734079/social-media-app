@@ -77,8 +77,8 @@ const CreateProfile = () => {
             <div>
                 <h1 className="text-4xl font-bold text-center my-6 text-red-600">Linknest</h1>
             </div>
-            <div className="flex items-center justify-center bg-white space-x-5">
-                <Lottie className='h-[600px] w-[500px] mb-4' animationData={create} />
+            <div className="flex items-center justify-around bg-white mx-2 mb-1">
+                <Lottie className='hidden md:block h-[600px] w-[500px] mb-4' animationData={create} />
                 <form
                     className="bg-red-600 p-7 rounded-lg shadow-lg w-96"
                     onSubmit={handleSaveProfile}

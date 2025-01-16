@@ -57,11 +57,12 @@ const Login = () => {
   return (
     <div className="items-center text-center justify-center">
       <h1 className="text-6xl my-8 font-bold text-center text-red-600 opacity-90">Linknest</h1>
-      <div className="flex items-center justify-center bg-white text-black space-x-5">
-        <div>
+      <div className="flex items-center md:justify-around justify-center text-black mx-2">
+        <div className='hidden md:block'>
           <Lottie className="w-[500px] h-[550px] m-2" animationData={robo} />
         </div>
-        <div className="flex flex-col items-center bg-red-600 px-8 py-14 space-y-4 max-w-sm w-full rounded-lg opacity-95">
+        <div className="flex flex-col items-center justify-center bg-red-600 px-8 py-14 space-y-4 max-w-sm w-full rounded-lg opacity-95">
+          <h1 className='text-4xl text-white font-semibold'>Login</h1>
           <form className="w-full space-y-4" onSubmit={handleLogin}>
             <input
               type="text"
@@ -81,12 +82,12 @@ const Login = () => {
             />
             <button
               type="submit"
-              className="w-full py-3 bg-black hover:bg-slate-950 rounded text-white font-medium"
+              className="w-full py-3 bg-black hover:bg-gray-950 rounded text-white font-medium"
             >
               Log in
             </button>
           </form>
-          <div className="text-center text-black mt-4">
+          <div className="text-center text-white mt-4">
             Don't have an account?{' '}
             <Link to={'/sign-up'} className="text-black hover:underline font-semibold text-lg">
               SignUp
