@@ -42,7 +42,7 @@ const ChatArea = () => {
                     .select('*')
                     .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
                     .order('created_at', { ascending: false })
-                    .limit(20)
+                    .limit(10)
                     .lt('created_at', lastFetchMessage || new Date().toISOString());
     
                 if (error) {
@@ -199,7 +199,7 @@ const ChatArea = () => {
                 <div className="text-center text-gray-600 my-4">Loading previous messages...</div>
             )}
 
-            <div className="">
+            <div className="flex flex-col justify-end h-screen">
                 {messages
                     .filter(
                         (msg) =>
@@ -208,10 +208,10 @@ const ChatArea = () => {
                     ).map((msg, index) => (
                         <div
                             key={index}
-                            className={`relative group flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
+                            className={`relative items-end group flex mb-4 ${msg.isSender ? 'justify-end' : 'justify-start'}`}
                         >
 
-                            <div className={`absolute hidden -my-5 mx-1 group-hover:block`}>
+                            <div className={`absolute top-0 hidden -my-5 mx-1 group-hover:block`}>
                                 <button
                                     className="text-gray-500 hover:text-gray-800"
                                     onClick={() => {
