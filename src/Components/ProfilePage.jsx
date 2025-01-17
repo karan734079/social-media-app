@@ -47,6 +47,7 @@ const Profile = () => {
       });
       setFollowing(response.data);
       setShowFollowing(true);
+      console.log(response.data)
     }
   };
 
@@ -97,6 +98,7 @@ const Profile = () => {
 
       setProfile({ ...profile, profilePhoto: response.data.user.profilePhoto });
       setShowChangePhoto(false);
+      setNewPhoto("");
     } catch (error) {
       console.error("Error uploading photo:", error.response || error);
     }
@@ -109,7 +111,7 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col items-center py-8">
-      <div className="w-full max-w-4xl p-4 space-y-6">
+      <div className="w-full max-w-4xl p-4 ">
         <div className="flex flex-col sm:flex-row items-center sm:space-x-14">
           <div className="relative">
             <img
@@ -145,7 +147,7 @@ const Profile = () => {
 
         {showChangePhoto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-lg w-1/3 p-6 relative">
+            <div className="bg-white  rounded-lg shadow-lg w-1/3 p-6 relative">
               {/* Header */}
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-bold text-red-600">Change Profile Photo</h2>
@@ -183,7 +185,10 @@ const Profile = () => {
               {/* Buttons */}
               <div className="mt-6 flex justify-end space-x-4">
                 <button
-                  onClick={() => setShowChangePhoto(false)}
+                  onClick={() => {setShowChangePhoto(false)
+                    setNewPhoto("");
+                  }
+                  }
                   className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400 transition duration-200"
                 >
                   Cancel
@@ -237,7 +242,7 @@ const Profile = () => {
                       alt={follow.username}
                       className="h-10 w-10 rounded-full mr-4 object-contain"
                     />
-                    <p className="text-gray-700">{follow.username}</p>
+                    <p className="text-gray-700">{follow.name}</p>
                   </li>
                 ))}
               </ul>

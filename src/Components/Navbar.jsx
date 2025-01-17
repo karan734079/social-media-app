@@ -95,6 +95,7 @@ const Navbar = () => {
             setIsCreateModalOpen(false);
             setSelectedFile(null);
             setCaption('');
+            setImagePreview("");
         } catch (err) {
             console.error("Error uploading post:", err.message);
             toast.error('Error uploading post', {
@@ -222,8 +223,8 @@ const Navbar = () => {
                 <Modal
                     isOpen={isCreateModalOpen}
                     onRequestClose={() => setIsCreateModalOpen(false)}
-                    className="flex justify-center items-center mx-auto my-56 max-w-lg w-full bg-red-600 rounded-lg shadow-lg p-6"
-                    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+                    className=" max-w-lg w-full bg-red-600 rounded-lg shadow-lg p-6"
+                    overlayClassName="fixed flex justify-center items-center inset-0 bg-black bg-opacity-50"
                 >
                     <div className="w-full max-w-md mx-auto">
                         <h2 className="text-2xl text-center mb-4 font-bold">Create a Post</h2>
@@ -255,7 +256,9 @@ const Navbar = () => {
                                 Upload
                             </button>
                             <button
-                                onClick={() => setIsCreateModalOpen(false)}
+                                onClick={() => {setIsCreateModalOpen(false)
+                                    setImagePreview("");
+                                }}
                                 className="bg-white text-black py-2 px-4 rounded-md hover:bg-gray-200 transition-colors w-full"
                             >
                                 Cancel
@@ -274,3 +277,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

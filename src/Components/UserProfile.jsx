@@ -139,7 +139,7 @@ const UserProfile = () => {
                       alt={follow.username}
                       className="h-10 w-10 rounded-full mr-4 object-contain"
                     />
-                    <p className="text-gray-700">{follow.username}</p>
+                    <p className="text-gray-700">{follow.name}</p>
                   </li>
                 ))}
               </ul>

@@ -180,7 +180,7 @@ const MainFeed = () => {
   return (
     <div className="flex">
       <div className="flex justify-center">
-        <div className="w-full max-w-xl flex flex-col space-y-6 p-4">
+        <div className="w-full max-w-xl flex overflow-y-auto h-[87vh] scroll-bar flex-col space-y-6 p-4">
           {posts.map((post) => (
             <div className="bg-white shadow rounded-lg p-4" key={post.id}>
               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => viewUserProfile(post.user_id)}>
