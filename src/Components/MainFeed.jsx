@@ -39,65 +39,92 @@ const MainFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Fetch posts
         const { data: fetchedPosts, error } = await supabase
           .from("posts")
           .select("*")
           .order("created_at", { ascending: false });
-
+  
         if (error) throw error;
-
-        // Fetch comments for these posts
+  
         const postIds = fetchedPosts.map((post) => post.id);
-        const { data: commentsData, error: commentsError } = await supabase
-          .from("comments")
+  
+        const { data: likesData, error: likesError } = await supabase
+          .from("post_likes")
           .select("*")
           .in("post_id", postIds);
-
-        if (commentsError) throw commentsError;
-
-        // Combine posts with comments
-        const postsWithComments = fetchedPosts.map((post) => ({
+  
+        if (likesError) throw likesError;
+  
+        // Check if the current user liked each post
+        const postsWithLikes = fetchedPosts.map((post) => ({
           ...post,
-          comments: commentsData.filter((comment) => comment.post_id === post.id),
+          likes: likesData.filter((like) => like.post_id === post.id).length,
+          isLiked: likesData.some(
+            (like) => like.post_id === post.id && like.user_id === currentUserId
+          ),
         }));
-
-        setPosts(postsWithComments);
+  
+        setPosts(postsWithLikes);
       } catch (err) {
         console.error("Error fetching posts:", err.message);
       }
     };
-
+  
     if (currentUserId) fetchPosts();
-  }, [currentUserId]);
+  }, [currentUserId]);  
 
   const handleLike = async (postId, isLiked) => {
     try {
-      const { error } = await supabase.rpc(isLiked ? "decrement_likes" : "increment_likes", {
-        post_id: postId,
-        user_id: currentUserId,
-      });
-
-      if (error) {
-        console.error("Error with like operation:", error.message);
-        throw error;
+      if (!currentUserId) {
+        console.error("User not logged in");
+        return;
       }
-
-      const updatedPosts = posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              likes: isLiked ? post.likes - 1 : post.likes + 1,
-              isLiked: !isLiked,
-            }
-          : post
+  
+      if (isLiked) {
+        // Remove like
+        const { error } = await supabase
+          .from("post_likes")
+          .delete()
+          .match({ post_id: postId, user_id: currentUserId });
+  
+        if (error) throw error;
+      } else {
+        // Add like
+        const { error } = await supabase.from("post_likes").insert([
+          {
+            post_id: postId,
+            user_id: currentUserId,
+          },
+        ]);
+  
+        if (error) throw error;
+      }
+  
+      // Fetch updated likes count
+      const { data: likesData, error: likesError } = await supabase
+        .from("post_likes")
+        .select("*")
+        .eq("post_id", postId);
+  
+      if (likesError) throw likesError;
+  
+      // Update the local state with new like count
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                likes: likesData.length, // Update the likes count
+                isLiked: !isLiked, // Toggle like status
+              }
+            : post
+        )
       );
-
-      setPosts(updatedPosts);
     } catch (err) {
       console.error("Error liking post:", err.message);
     }
   };
+  
 
   // const openLikedUsersModal = async (postId) => {
   //   try {
