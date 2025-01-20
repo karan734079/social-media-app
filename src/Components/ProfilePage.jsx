@@ -147,7 +147,7 @@ const Profile = () => {
 
         {showChangePhoto && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white  rounded-lg shadow-lg w-1/3 p-6 relative">
+            <div className="bg-white  rounded-lg shadow-lg md:w-1/3 p-6 relative">
               {/* Header */}
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-bold text-red-600">Change Profile Photo</h2>
@@ -206,7 +206,7 @@ const Profile = () => {
 
         {showFollowers && (
           <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
-            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+            <div className="bg-white rounded-lg md:w-1/3 w-full m-5 overflow-y-auto scroll-bar max-h-96 p-4">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Followers</h3>
               <ul>
                 {followers.map((follower) => (
@@ -232,7 +232,7 @@ const Profile = () => {
 
         {showFollowing && (
           <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
-            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+            <div className="bg-white rounded-lg md:w-1/3 w-full m-5 overflow-y-auto scroll-bar max-h-96 p-4">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Following</h3>
               <ul>
                 {following.map((follow) => (

@@ -48,7 +48,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="w-[500px] py-6 px-4 overflow-y-auto h-screen scroll-bar ">
+        <div className="md:w-[500px] py-6 px-4 overflow-y-auto h-screen scroll-bar ">
             <h2 className="text-2xl font-semibold text-red-600 mb-4">Notifications ({unreadCount})</h2>
             <ul>
                 {notifications.map((notification) => (

@@ -107,11 +107,11 @@ const Posts = () => {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-16 gap-y-10 p-6">
+    <div className="grid md:grid-cols-3 grid-cols-1 gap-x-10 gap-y-6  md:gap-y-10 p-6">
       {posts.map((post) => (
         <div
           key={post.id}
-          className="relative group cursor-pointer  w-72  h-72  bg-gray-50 shadow-md rounded-lg overflow-hidden"
+          className="relative group cursor-pointer m-auto  w-72  h-72  bg-gray-50 shadow-md rounded-lg overflow-hidden"
           onClick={() => openModal(post)}
         >
           {post.media_type === "video" ? (
@@ -138,9 +138,9 @@ const Posts = () => {
       ))}
 
       {selectedPost && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white max-w-2xl max-h-96 w-full rounded-lg shadow-lg overflow-hidden flex">
-            <div className="w-2/3 bg-gray-100">
+        <div className="fixed inset-0 bg-black bg-opacity-70  flex justify-center items-center z-50">
+          <div className="bg-white max-w-2xl max-h-96 w-full m-5 rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
+            <div className="md:w-2/3 bg-gray-100">
               {selectedPost.media_type === "video" ? (
                 <video
                   controls
@@ -151,11 +151,11 @@ const Posts = () => {
                 <img
                   src={selectedPost.media_url}
                   alt="Post"
-                  className="w-full h-full object-contain"
+                  className="md:w-full md:h-full w-[75%] h-[75%]  mx-auto object-contain"
                 />
               )}
             </div>
-            <div className="w-1/3 p-6 flex flex-col">
+            <div className="md:w-1/3 p-6 flex md:flex-col justify-between">
               <div className="mb-4">
                 <h2 className="font-semibold text-lg">{selectedPost.caption}</h2>
                 <span className="text-sm text-gray-600">
@@ -164,7 +164,7 @@ const Posts = () => {
               </div>
 
               {/* Displaying Comments */}
-              <div className="flex-grow overflow-y-auto scroll-bar">
+              <div className="flex-grow overflow-y-auto hidden md:block scroll-bar">
                 <h3 className="font-semibold text-md">Comments</h3>
                 <div className="space-y-2 mt-2 ">
                   {selectedPost.comments.length > 0 ? (
@@ -193,7 +193,7 @@ const Posts = () => {
                     handleDelete(selectedPost.id); // Call the delete function
                     closeModal(); // Close the modal
                   }}
-                  className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 w-full mb-4"
+                  className="bg-red-600 text-white py-2 px-2 rounded hover:bg-red-700 w-full mb-4"
                 >
                   Delete Post
                 </button>

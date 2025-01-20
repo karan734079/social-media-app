@@ -59,11 +59,11 @@ const PostsList = ({ userId }) => {
   const closeModal = () => setSelectedPost(null);
 
   return (
-    <div className="grid grid-cols-3 gap-16 p-6">
+    <div className="grid md:grid-cols-3 grid-cols-1 md:gap-16 gap-y-6 p-6">
       {posts.map((post) => (
         <div
           key={post.id}
-          className="relative group cursor-pointer w-72  h-72  bg-gray-100 shadow-md rounded-lg overflow-hidden"
+          className="relative group cursor-pointer w-72 m-auto h-72  bg-gray-100 shadow-md rounded-lg overflow-hidden"
           onClick={() => openModal(post)}
         >
           {post.media_type === "video" ? (
@@ -91,7 +91,7 @@ const PostsList = ({ userId }) => {
 
       {selectedPost && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-          <div className="bg-white max-w-2xl max-h-96 w-full rounded-lg shadow-lg overflow-hidden flex">
+          <div className="bg-white max-w-2xl max-h-96 w-full m-5 rounded-lg shadow-lg overflow-hidden flex">
             <div className="w-2/3 bg-gray-100">
               {selectedPost.media_type === "video" ? (
                 <video
@@ -116,7 +116,7 @@ const PostsList = ({ userId }) => {
               </div>
 
               {/* Displaying Comments */}
-              <div className="flex-grow overflow-y-auto scroll-bar">
+              <div className="flex-grow overflow-y-auto hidden md:block scroll-bar">
                 <h3 className="font-semibold text-md">Comments</h3>
                 <div className="space-y-2 mt-2 ">
                   {selectedPost.comments.length > 0 ? (

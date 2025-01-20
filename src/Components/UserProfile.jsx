@@ -73,7 +73,7 @@ const UserProfile = () => {
 
   return (
     <div className="flex flex-col items-center py-8">
-      <div className="w-full max-w-4xl p-4 space-y-6">
+      <div className="w-full max-w-4xl p-4 ">
         <div className="flex flex-col sm:flex-row items-center sm:space-x-14">
           <div className="relative">
             <img
@@ -83,7 +83,7 @@ const UserProfile = () => {
             />
           </div>
           <div className="text-center sm:text-left">
-            <div className='flex space-x-4'><h2 className="text-3xl font-bold text-gray-800">{user.name}</h2> <button className='text-red-600 rounded p-2 border'>Message</button></div>
+            <h2 className="text-3xl font-bold text-gray-800">{user.name}</h2>
             <h2 className="text-base mt-1">@{user.username}</h2>
             <h2 className="text-base">{user.email}</h2>
             <h2 className="text-base">{user.address}</h2>
@@ -102,8 +102,8 @@ const UserProfile = () => {
         </div>
 
         {showFollowers && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
-            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg md:w-1/3 w-full m-5 overflow-y-auto scroll-bar max-h-96 p-4">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Followers</h3>
               <ul>
                 {followers.map((follower) => (
@@ -129,7 +129,7 @@ const UserProfile = () => {
 
         {showFollowing && (
           <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-40">
-            <div className="bg-white rounded-lg w-1/3 overflow-y-auto scroll-bar max-h-96 p-4">
+            <div className="bg-white rounded-lg md:w-1/3 w-full m-5 overflow-y-auto scroll-bar max-h-96 p-4">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Following</h3>
               <ul>
                 {following.map((follow) => (

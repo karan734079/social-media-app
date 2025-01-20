@@ -18,6 +18,7 @@ import Searchbar from "./Components/Searchbar";
 import UserProfile from "./Components/UserProfile";
 import Notifications from "./Components/Notifications";
 import Chat from "./Components/Chat";
+import MobileNav from "./Components/MobileNav";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = !!localStorage.getItem("token");
@@ -25,9 +26,15 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const ProtectedLayout = ({ children }) => (
-  <div className="flex">
-    <Navbar />
-    <div className="ml-80 w-full">{children}</div>
+  <div>
+    <div className="md:flex hidden">
+      <Navbar />
+      <div className="ml-80 w-full">{children}</div>
+    </div>
+    <div className="flex flex-col md:hidden">
+      <MobileNav />
+      <div className="w-full">{children}</div>
+    </div>
   </div>
 );
 
@@ -100,7 +107,7 @@ const appRouter = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <ProtectedLayout>
-          <Chat/>
+          <Chat />
         </ProtectedLayout>
       </ProtectedRoute>
     ),

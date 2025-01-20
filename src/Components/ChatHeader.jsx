@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 
 const socket = io("http://localhost:5000");
 
-const ChatHeader = () => {
+const ChatHeader = ({ backList }) => {
   const { selectedUser } = useSelector((state) => state.chat); // Get selected user from Redux
   const [showVideoChat, setShowVideoChat] = useState(false);
   const [showAudioChat, setShowAudioChat] = useState(false);
@@ -112,7 +112,11 @@ const ChatHeader = () => {
   return (
     <>
       <div className="flex items-center justify-between p-2 bg-red-600 text-white">
+
         <div className="flex items-center">
+          <button onClick={() => backList(false)} className="">
+            <i class="fa-solid fa-arrow-left mr-2 opacity-80"></i>
+          </button>
           <img
             src={selectedUser?.profilePhoto || "/default-profile.png"}
             alt="User"

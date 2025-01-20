@@ -121,21 +121,20 @@ const Reels = () => {
     <div className="flex">
       <div
         className="reels-container scroll-bar"
-        style={{ height: "100vh", overflowY: "scroll" }}
+        style={{ height: "100vh", overflowY: "scroll"  }}
       >
-        <p className="text-3xl text-red-600 font-bold m-5">Reels</p>
+        <p className="text-3xl text-red-600 font-bold md:block hidden my-3">Reels</p>
         {/* Reels Videos Section */}
         <div
           className="reels-videos"
           style={{
-            width: "100%",
             display: "flex",
             flexDirection: "column",
           }}
         >
           {posts.map((post, index) => (
             <div
-              className="reel-item relative w-full sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[600px] h-screen mb-6"
+              className="reel-item relative w-[95%] mt-2 m-auto md:w-[500px] h-screen mb-6"
               key={post.id}
             >
               <div className="flex justify-between p-3 absolute top-0 left-0 w-full z-10">
@@ -197,7 +196,7 @@ const Reels = () => {
       </div>
 
       {/* Suggested Users Section */}
-      <div className="px-4 mt-20">
+      <div className="px-4 md:block hidden mt-20">
         <SuggestedUsers />
       </div>
     </div>

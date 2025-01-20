@@ -54,7 +54,7 @@ const Searchbar = () => {
 
     return (
         <div className="p-4">
-            <div className="relative right-40">
+            <div className="relative md:right-40 right-96">
                 <div className="flex w-full max-w-lg ml-96 border rounded-full shadow focus:outline-none">
                     <input
                         type="text"

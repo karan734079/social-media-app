@@ -126,35 +126,6 @@ const MainFeed = () => {
   };
   
 
-  // const openLikedUsersModal = async (postId) => {
-  //   try {
-  //     // Fetch the list of users who liked the post
-  //     const { error } = await supabase
-  //       .from("post_likes")
-  //       .select("user_id")
-  //       .eq("post_id", postId);
-
-  //     if (error) {
-  //       console.error("Error fetching liked users:", error.message);
-  //       return;
-  //     }
-
-  //     // Fetch the profile names and photos for the liked users
-  
-
-  //     // Set the liked users' profiles to show in the modal
-  //     // setLikedUsers(userProfiles.filter((profile) => profile !== null));
-  //     // setShowLikedUsersModal(true);
-  //   } catch (err) {
-  //     console.error("Error fetching liked users:", err.message);
-  //   }
-  // };
-
-  // const closeLikedUsersModal = () => {
-  //   setShowLikedUsersModal(false);
-  //   setLikedUsers([]);
-  // };
-
   const handleAddComment = async (postId) => {
     try {
       const { data, error } = await supabase.from("comments").insert([{
@@ -249,22 +220,19 @@ const MainFeed = () => {
                   <span>{post.comments ? post.comments.length : 0} comments</span>
                 </button>
                 <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                {/* <button onClick={() => openLikedUsersModal(post.id)} className="text-blue-500">
-                  View Liked Users
-                </button> */}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 hidden md:block">
         <SuggestedUsers />
       </div>
 
       {showCommentModal && selectedPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 space-y-4">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 space-y-4 m-5">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Comments</h3>
               <button onClick={closeCommentModal} className="text-gray-500">✕</button>
@@ -302,29 +270,6 @@ const MainFeed = () => {
           </div>
         </div>
       )}
-
-      {/* {showLikedUsersModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Liked Users</h3>
-              <button onClick={closeLikedUsersModal} className="text-gray-500">✕</button>
-            </div>
-            <div className="space-y-3">
-              {post.map((user) => (
-                <div key={user.user_id} className="flex items-center space-x-3">
-                  <img
-                    src={user.profile_photo || profileIcon}
-                    alt="User"
-                    className="w-8 h-8 rounded-full object-contain"
-                  />
-                  <span>{user.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
