@@ -145,9 +145,8 @@ const ChatHeader = ({ backList }) => {
       {callStatus && <p className="text-center mt-2">{callStatus}</p>}
 
       {/* Incoming Call Popup */}
-
-      <div className="relative z-50 flex justify-end">
-        {callerInfo.from && <div className={`rounded-xl m-5   shadow-lg absolute w-1/3 transition-transform duration-1000 ease-in-out`}>
+      <div className="relative z-50 flex md:justify-end justify-center">
+        {callerInfo.from && <div className={`rounded-xl m-5 shadow-lg absolute md:w-1/3 w-64 transition-transform duration-1000 ease-in-out`}>
           <div className="bg-white w-full px-2 py-2 rounded-xl">
             <p className="text-center font-medium mb-4">
               {callerInfo.callerName || "Someone"} is calling you...

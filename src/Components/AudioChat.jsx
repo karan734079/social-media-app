@@ -157,8 +157,8 @@ const AudioChat = ({ onClose, socket, selectedUser }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 w-[40%] h-5/6 left-[65rem] top-12 flex items-center justify-center">
-      <div className="w-[45%] h-4/6 bottom-10 bg-black text-white bg-opacity-80 flex flex-col rounded-lg relative">
+    <div className="fixed inset-0 z-50 md:w-[40%] md:h-5/6 md:left-[65rem] top-12 flex items-center justify-center">
+      <div className="md:w-[45%] p-5 md:p-0 md:m-0 mt-10 h-4/6 bottom-10 bg-black text-white bg-opacity-80 flex flex-col rounded-lg relative">
         {/* Header */}
         <div className="flex items-center justify-end p-4 text-white">
           <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl">

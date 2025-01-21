@@ -175,8 +175,8 @@ const VideoChat = ({ onClose, socket, selectedUser }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 w-[80%] left-[19.1rem] flex items-center justify-center bg-black bg-opacity-10">
-      <div className="w-[55%] h-4/5 bottom-10 bg-gray-700 text-white flex flex-col rounded-lg relative">
+    <div className="fixed inset-0 z-50 md:w-[80%] md:left-[19.1rem] flex items-center justify-center bg-black bg-opacity-10">
+      <div className="md:w-[55%] md:m-0 mt-50 h-screen  md:h-4/5 md:bottom-10 bg-gray-700 text-white flex flex-col md:rounded-lg relative">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-600">
           <div className="flex items-center">
