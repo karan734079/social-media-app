@@ -35,12 +35,12 @@ const UserProfile = () => {
         const filteredPosts = posts.filter((post) => post.user_id === userId);
         setUserPosts(filteredPosts);
 
-        const followersResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/followers?userId=${userId}`, {
+        const followersResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/followers/${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setFollowers(followersResponse.data);
 
-        const followingResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following?userId=${userId}`, {
+        const followingResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}api/auth/following/${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setFollowing(followingResponse.data);
@@ -139,7 +139,7 @@ const UserProfile = () => {
                       alt={follow.username}
                       className="h-10 w-10 rounded-full mr-4 object-contain"
                     />
-                    <p className="text-gray-700">{follow.name}</p>
+                    <p className="text-gray-700">{follow.username}</p>
                   </li>
                 ))}
               </ul>

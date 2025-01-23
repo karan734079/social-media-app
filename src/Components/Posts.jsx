@@ -27,45 +27,49 @@ const Posts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data: posts, error } = await supabase
+        const { data: fetchedPosts, error } = await supabase
           .from("posts")
           .select("*")
           .order("created_at", { ascending: false });
-
+  
         if (error) throw error;
 
-        // Filter posts based on the current user
-        const filteredPosts = posts.filter((post) => post.user_id === userId);
-
-        // Fetch comments for these posts
+        const filteredPosts = fetchedPosts.filter((post)=>post.user_id === userId)
+  
         const postIds = filteredPosts.map((post) => post.id);
+  
+        const { data: likesData, error: likesError } = await supabase
+          .from("post_likes")
+          .select("*")
+          .in("post_id", postIds);
+  
+        if (likesError) throw likesError;
+  
         const { data: commentsData, error: commentsError } = await supabase
           .from("comments")
           .select("*")
-          .in("post_id", postIds); // Get all comments for these posts
-
+          .in("post_id", postIds);
+  
         if (commentsError) throw commentsError;
-
-        // Store comments in state grouped by post_id
-        const commentsByPost = commentsData.reduce((acc, comment) => {
-          acc[comment.post_id] = acc[comment.post_id] || [];
-          acc[comment.post_id].push(comment);
-          return acc;
-        }, {});
-
-        // Update the posts state with the associated comments
-        const postsWithComments = filteredPosts.map((post) => ({
+        
+  
+        // Map posts and include likes and comments
+        const postsWithLikesAndComments = filteredPosts.map((post) => ({
           ...post,
-          comments: commentsByPost[post.id] || [],
+          likes: likesData.filter((like) => like.post_id === post.id).length,
+          isLiked: likesData.some(
+            (like) => like.post_id === post.id && like.user_id === userId
+          ),
+          comments: commentsData.filter((comment) => comment.post_id === post.id) || [], // Ensure comments is an array
         }));
-
-        setPosts(postsWithComments);
+  
+        setPosts(postsWithLikesAndComments);
       } catch (err) {
         console.error("Error fetching posts:", err.message);
       }
     };
-
-    if (userId) fetchPosts(); // Fetch posts once the userId is available
+  
+    if (userId) fetchPosts();
   }, [userId]);
 
   const openModal = (post) => setSelectedPost(post);

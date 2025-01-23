@@ -22,7 +22,6 @@ const Profile = () => {
       setProfile(response.data);
       setUserId(response.data._id);
     };
-
     fetchProfile();
   }, []);
 
@@ -34,7 +33,7 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setFollowers(response.data);
-      setShowFollowers(true);
+      setShowFollowers(true);  
     }
   };
 
@@ -47,7 +46,6 @@ const Profile = () => {
       });
       setFollowing(response.data);
       setShowFollowing(true);
-      console.log(response.data)
     }
   };
 

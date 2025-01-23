@@ -55,23 +55,32 @@ const MainFeed = () => {
   
         if (likesError) throw likesError;
   
-        // Check if the current user liked each post
-        const postsWithLikes = fetchedPosts.map((post) => ({
+        const { data: commentsData, error: commentsError } = await supabase
+          .from("comments")
+          .select("*")
+          .in("post_id", postIds);
+  
+        if (commentsError) throw commentsError;
+  
+        // Map posts and include likes and comments
+        const postsWithLikesAndComments = fetchedPosts.map((post) => ({
           ...post,
           likes: likesData.filter((like) => like.post_id === post.id).length,
           isLiked: likesData.some(
             (like) => like.post_id === post.id && like.user_id === currentUserId
           ),
+          comments: commentsData.filter((comment) => comment.post_id === post.id) || [], // Ensure comments is an array
         }));
   
-        setPosts(postsWithLikes);
+        setPosts(postsWithLikesAndComments);
       } catch (err) {
         console.error("Error fetching posts:", err.message);
       }
     };
   
     if (currentUserId) fetchPosts();
-  }, [currentUserId]);  
+  }, [currentUserId]);
+    
 
   const handleLike = async (postId, isLiked) => {
     try {
@@ -150,7 +159,7 @@ const MainFeed = () => {
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId
-            ? { ...post, comments: [...post.comments, data[0]] }
+            ? { ...post, comments: [...(post.comments || []), data[0]] } 
             : post
         )
       );
